@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About Tajzia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eef2f8;--sheet:#ffffff;--ink:#101c33;--muted:#54627a;--line:#cdd7e6;--grid:#dde5f0;
+  --cobalt:#2740d8;--cobalt-ink:#ffffff;--hl:#ffe14d;--hl-ink:#101c33;
+  --good:#0f7a52;--good-bg:#dcf3e8;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0a1120;--sheet:#111b2e;--ink:#e6ecf8;--muted:#95a5c2;--line:#26344f;--grid:#131e33;
+    --cobalt:#8ea4ff;--cobalt-ink:#0a1120;--hl:#ffe14d;--hl-ink:#101c33;
+    --good:#4ed3a0;--good-bg:#0f3327;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background-color:var(--paper);color:var(--ink);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;font:400 16px/1.65 var(--f-body)}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+a{color:var(--cobalt)}
+.wrap{max-width:800px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--sheet);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;max-width:800px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:21px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+.brand svg{width:28px;height:28px;flex:none;color:var(--ink)}
+.nav{display:flex;gap:18px;align-items:center;font-size:14px;font-weight:600}
+.nav a{text-decoration:none;color:var(--ink)}
+.nav a.cur{color:var(--cobalt)}
+.nav a.btn{border:1.5px solid var(--ink);border-radius:999px;padding:5px 16px;color:var(--ink)}
+
+.hero{padding:40px 0 8px}
+.eyebrow{display:inline-block;background:var(--hl);color:var(--hl-ink);font:700 12.5px/1.6 var(--f-body);letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 12px;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,5vw,46px);line-height:1.1;letter-spacing:-.025em;margin:0 0 14px;max-width:20ch}
+.lead{max-width:60ch;color:var(--muted);font-size:18px;line-height:1.6;margin:0 0 28px}
+
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:clamp(18px,3vw,30px);margin-bottom:18px}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:-.01em;margin:0 0 14px;line-height:1.3}
+h3{font-family:var(--f-display);font-weight:700;font-size:17px;margin:0 0 6px}
+p{margin:0 0 14px;max-width:68ch}
+p:last-child{margin-bottom:0}
+ul{margin:0 0 14px;padding-inline-start:22px}
+li{margin:5px 0;max-width:66ch}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
+.card{border:1.5px solid var(--line);border-radius:10px;padding:16px 18px}
+.card b{font-family:var(--f-display);display:block;font-size:17px;margin-bottom:4px}
+.card p{color:var(--muted);font-size:15px;margin:0}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 0}
+.tag{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13.5px;font-weight:500}
+.check{list-style:none;margin:0 0 6px;padding:0}
+.check li{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+.check li::before{content:"✓";color:var(--good);background:var(--good-bg);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;margin-top:2px}
+.note{background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:12px 16px;font-size:14.5px;color:var(--muted)}
+.cta{display:inline-block;margin-top:6px;background:var(--cobalt);color:var(--cobalt-ink);font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;border:1.5px solid var(--cobalt);box-shadow:0 3px 0 var(--ink)}
+.contact{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:15px}
+.contact div span{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}
+.foot{color:var(--muted);font-size:14px;padding:14px 0 40px;max-width:70ch}
+@media (max-width:600px){.cards{grid-template-columns:1fr}.nav{gap:12px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href=".index.html">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="17" width="4" height="8" fill="currentColor"/><rect x="14" y="11" width="4" height="14" fill="currentColor"/><rect x="21" y="6" width="4" height="19" fill="#2740d8"/></svg>
+      Tajzia
+    </a>
+    <nav class="nav">
+      <a href=".index.html">Analyze</a>
+      <a href=".about.html" class="cur">About</a>
+      <a href=".index.html" class="btn">Open the tool</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">About</span>
+    <h1>A quick, private second opinion on your writing and your numbers.</h1>
+    <p class="lead">Tajzia checks CVs, assignments, research reports, theses, and financial statements against plain, well-known rules — instantly, in your browser, with no AI and nothing uploaded to a server.</p>
+  </section>
+
+  <section class="sheet">
+    <h2>What Tajzia does</h2>
+    <div class="cards">
+      <div class="card">
+        <b>Document analysis</b>
+        <p>Paste or upload a CV, assignment, research report or thesis. Tajzia checks structure, length, clarity, citations and evidence, and gives an overall score with specific fixes.</p>
+        <div class="tag-row"><span class="tag">CV / Résumé</span><span class="tag">Assignment</span><span class="tag">Research report</span><span class="tag">Thesis</span></div>
+      </div>
+      <div class="card">
+        <b>Financial analysis</b>
+        <p>Enter — or upload — an income statement and balance sheet. Tajzia calculates standard liquidity, profitability, leverage, efficiency and growth ratios, plus a plain-language summary of what they mean.</p>
+        <div class="tag-row"><span class="tag">Ratios</span><span class="tag">DuPont breakdown</span><span class="tag">Horizontal &amp; vertical analysis</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet">
+    <h2>How it works</h2>
+    <p>Tajzia does not use AI, language models or any external analysis service. Every check is a fixed rule or a standard formula:</p>
+    <ul class="check">
+      <li>Document checks look at things like word count, sentence length, readability, passive voice, section headings, citation counts and repeated keywords.</li>
+      <li>Financial checks use textbook formulas — current ratio, gross and net margin, debt-to-equity, ROE, days sales outstanding, and so on — applied to the numbers you provide.</li>
+      <li>Everything runs as JavaScript in your own browser. Nothing you type or upload is sent to a server or stored anywhere.</li>
+    </ul>
+    <div class="note">Because it is rule-based, Tajzia is consistent and transparent — but it is not judgment. It can miss context a careful human reader would catch, and it should be treated as a first pass, not a final word.</div>
+  </section>
+
+  <section class="sheet">
+    <h2>What Tajzia is not</h2>
+    <ul>
+      <li><b>Not a grade or a verdict.</b> The score reflects structure and language patterns, not the quality of your ideas or arguments.</li>
+      <li><b>Not a plagiarism checker.</b> Tajzia cannot tell you whether text was copied from somewhere else.</li>
+      <li><b>Not financial or legal advice.</b> Ratio benchmarks are general rules of thumb — always compare against your own industry, and consult a qualified accountant or advisor before making decisions.</li>
+      <li><b>Not a live data source.</b> Currency exchange rates are approximate defaults that you can edit; they are not pulled from a live feed.</li>
+    </ul>
+  </section>
+
+  <section class="sheet">
+    <h2>Privacy</h2>
+    <p>Tajzia runs entirely client-side. There is no account, no login and no upload endpoint — the text and figures you enter stay on your own device for the length of your session. Reloading the page clears everything.</p>
+  </section>
+
+  <section class="sheet">
+    <h2>Languages &amp; currency</h2>
+    <p>The interface is available in English, Urdu and Sindhi, and figures can be displayed in PKR, USD, EUR, GBP, AED, SAR, CNY or INR using rates you can adjust yourself. English-language checks such as readability and passive-voice detection are most reliable on English text.</p>
+  </section>
+
+  <section class="sheet">
+    <h3>Built by</h3>
+    <p>Tajzia is a product of <b>MSUKASHA</b>, based in Islamabad, Pakistan.</p>
+    <div class="contact">
+      <div><span>Email</span>info@msukasha.com</div>
+      <div><span>WhatsApp</span>+92 331 3730953</div>
+    </div>
+  </section>
+
+  <a class="cta" href="/index.html">Open Analysis →</a>
+</main>
+<footer class="wrap foot">Tajzia performs rule-based analysis only. It does not replace professional review — academic, editorial, or financial.</footer>
+</body>
+</html>

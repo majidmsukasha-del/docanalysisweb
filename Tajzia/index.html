@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tajzia: Document and Financial Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eef2f8;--sheet:#ffffff;--ink:#101c33;--muted:#54627a;--line:#cdd7e6;--grid:#dde5f0;
+  --cobalt:#2740d8;--cobalt-ink:#ffffff;--hl:#ffe14d;--hl-ink:#101c33;
+  --good:#0f7a52;--good-bg:#dcf3e8;--warn:#8a5a00;--warn-bg:#fdf0c4;--bad:#c22a41;--bad-bg:#fbe0e4;
+  --f-good:#12a06b;--f-warn:#f0b400;--f-bad:#e0364f;
+  --k1:#2740d8;--k2:#0d9aa8;--k3:#e0a800;--k4:#8a4fd0;--k5:#c22a41;--k6:#0f9d6b;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0a1120;--sheet:#111b2e;--ink:#e6ecf8;--muted:#95a5c2;--line:#26344f;--grid:#131e33;
+    --cobalt:#8ea4ff;--cobalt-ink:#0a1120;--hl:#ffe14d;--hl-ink:#101c33;
+    --good:#4ed3a0;--good-bg:#0f3327;--warn:#f0c15c;--warn-bg:#3a2d0b;--bad:#ff8a9a;--bad-bg:#43161f;
+    --f-good:#2fc58d;--f-warn:#f0c040;--f-bad:#ff6b80;
+    --k1:#8ea4ff;--k2:#3ec8d6;--k3:#f0c040;--k4:#b58aec;--k5:#ff6b80;--k6:#2fc58d;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0a1120;--sheet:#111b2e;--ink:#e6ecf8;--muted:#95a5c2;--line:#26344f;--grid:#131e33;
+  --cobalt:#8ea4ff;--cobalt-ink:#0a1120;--hl:#ffe14d;--hl-ink:#101c33;
+  --good:#4ed3a0;--good-bg:#0f3327;--warn:#f0c15c;--warn-bg:#3a2d0b;--bad:#ff8a9a;--bad-bg:#43161f;
+  --f-good:#2fc58d;--f-warn:#f0c040;--f-bad:#ff6b80;
+  --k1:#8ea4ff;--k2:#3ec8d6;--k3:#f0c040;--k4:#b58aec;--k5:#ff6b80;--k6:#2fc58d;
+  color-scheme:dark;
+}
+html[lang="ur"]{--f-body:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif;--f-display:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif}
+html[lang="sd"]{--f-body:'Noto Naskh Arabic','Noto Nastaliq Urdu',serif;--f-display:'Noto Naskh Arabic','Noto Nastaliq Urdu',serif}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{
+  margin:0;background-color:var(--paper);color:var(--ink);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  font:400 16px/1.6 var(--f-body);
+}
+html[lang="ur"] body{line-height:2.1}
+html[lang="sd"] body{line-height:1.85}
+[dir="rtl"] *{letter-spacing:0!important}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.num{direction:ltr;unicode-bidi:isolate;display:inline-block;font-variant-numeric:tabular-nums}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--sheet);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:23px;letter-spacing:-.02em;line-height:1.2}
+.navlinks{display:flex;gap:8px;margin-inline-end:auto}
+.about-link{font:600 14px/1.5 var(--f-body);color:var(--ink);text-decoration:none;border:1.5px solid var(--line);border-radius:999px;padding:5px 16px}
+.about-link:hover{border-color:var(--ink)}
+.brand svg{width:32px;height:32px;flex:none}
+.ctrls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lang{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.lang button{border:0;background:transparent;color:var(--ink);font:600 14px/1.5 var(--f-body);padding:5px 14px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.sel{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.sel select{font:500 14px/1.5 var(--f-body);color:var(--ink);background:var(--sheet);border:1.5px solid var(--ink);border-radius:8px;padding:5px 8px;max-width:190px}
+
+/* hero + doors */
+.hero{padding:34px 0 20px}
+.hero h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,48px);line-height:1.1;letter-spacing:-.025em;max-width:22ch;margin:0 0 14px}
+html[lang="ur"] .hero h1{line-height:1.75;font-weight:600;max-width:24ch}
+html[lang="sd"] .hero h1{line-height:1.5;max-width:24ch}
+.hero p{max-width:62ch;color:var(--muted);margin:0}
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 22px}
+.door{text-align:start;border:1.5px dashed var(--line);background:transparent;border-radius:12px;padding:14px 16px;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:2px}
+.door b{font-family:var(--f-display);font-size:19px;font-weight:700;letter-spacing:-.01em}
+.door span{color:var(--muted);font-size:14px;line-height:1.4}
+.door[aria-selected="true"]{background:var(--sheet);border:1.5px solid var(--ink);box-shadow:0 5px 0 var(--hl)}
+
+/* sheets and forms */
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:clamp(16px,2.4vw,26px);margin-bottom:16px}
+.sheet h2{font-family:var(--f-display);font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px;line-height:1.3}
+.sheet h3{font-family:var(--f-display);font-size:18px;font-weight:700;margin:0 0 10px;line-height:1.3}
+.sheet h4{font-family:var(--f-display);font-size:16px;font-weight:700;margin:18px 0 2px;color:var(--cobalt)}
+.lbl{font-weight:600;font-size:14px;margin:0 0 8px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chips button{font:500 14px/1.5 var(--f-body);border:1.5px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:999px;padding:6px 16px;cursor:pointer}
+.chips button[aria-checked="true"]{background:var(--hl);color:var(--hl-ink);border-color:var(--ink);font-weight:600}
+textarea,input[type="text"],input[type="number"]{width:100%;font:inherit;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:250px;resize:vertical;line-height:1.6}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}
+.hint{color:var(--muted);font-size:14px;margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+.btn{font:600 15px/1.5 var(--f-body);padding:9px 18px;border-radius:8px;border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--cobalt);color:var(--cobalt-ink);border-color:var(--cobalt);box-shadow:0 3px 0 var(--ink)}
+.btn.primary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{border-color:var(--line);font-weight:500}
+.file input{position:absolute;width:1px;height:1px;opacity:0}
+.file:focus-within{outline:3px solid var(--cobalt);outline-offset:2px}
+.msg{min-height:1.6em;margin:6px 0 0;color:var(--bad);font-size:14px}
+.msg.info{color:var(--muted)}
+
+/* gauge */
+.rtop{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:32px;align-items:center}
+.gauge{direction:ltr}
+.gnum{font-family:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;font-weight:800;font-size:clamp(60px,10vw,92px);line-height:1;letter-spacing:-.04em}
+.gnum small{font-size:.3em;color:var(--muted);font-weight:600;letter-spacing:0;margin-left:6px}
+.ruler{position:relative;height:22px;margin-top:14px;border-radius:4px;background:var(--grid);border:1px solid var(--line)}
+.ruler .fill{position:absolute;top:0;bottom:0;left:0;width:var(--v);border-radius:3px 0 0 3px}
+.ruler::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(10,17,32,.32) calc(10% - 1px),rgba(10,17,32,.32) 10%);pointer-events:none}
+.ruler .mark{position:absolute;left:var(--v);top:-9px;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid var(--ink);transform:translateX(-50%);z-index:2}
+.gticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.fill.good{background:var(--f-good)}.fill.warn{background:var(--f-warn)}.fill.bad{background:var(--f-bad)}
+.grade{margin-top:10px;font-family:var(--f-display);font-size:22px;font-weight:700}
+.grade span{font-family:var(--f-body);font-size:14px;font-weight:400;color:var(--muted);margin-inline-start:8px}
+.cat{margin-bottom:14px}
+.cat-h{display:flex;justify-content:space-between;font-weight:600;font-size:14px;margin-bottom:4px}
+.bar{position:relative;height:10px;background:var(--grid);border:1px solid var(--line);border-radius:3px;overflow:hidden;direction:ltr}
+.bar i{display:block;height:100%}
+.bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(10,17,32,.3) calc(10% - 1px),rgba(10,17,32,.3) 10%)}
+.bar i.good{background:var(--f-good)}.bar i.warn{background:var(--f-warn)}.bar i.bad{background:var(--f-bad)}
+.fixfirst{background:var(--warn-bg);border-radius:8px;padding:12px 16px;margin-top:20px}
+.fixfirst h3{margin-bottom:6px;font-size:16px}
+.fixfirst ul{margin:0;padding-inline-start:20px}
+.fixfirst li{margin:4px 0;font-size:15px}
+
+/* stats, checks, chips */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.stat{background:var(--sheet);padding:10px 14px;display:flex;flex-direction:column}
+.stat span{font-size:13px;color:var(--muted);line-height:1.4}
+.stat b{font-family:var(--f-display);font-size:22px;font-weight:700;line-height:1.3}
+.checks{list-style:none;margin:0;padding:0}
+.ck{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:10px 0;border-top:1px dashed var(--line)}
+.ck:first-child{border-top:0}
+.ck .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:800 13px/1 var(--f-body);margin-top:3px}
+.ck.pass .ic{background:var(--good-bg);color:var(--good)}
+.ck.warn .ic{background:var(--warn-bg);color:var(--warn)}
+.ck.fail .ic{background:var(--bad-bg);color:var(--bad)}
+.ck-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.ck-t b{font-weight:600}
+.val{color:var(--muted);font-size:13px}
+.ck p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.kw{display:flex;flex-wrap:wrap;gap:8px}
+.kw span{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:14px}
+.kw span b{margin-inline-start:6px;color:var(--cobalt)}
+details.sheet summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:18px}
+details.sheet[open] summary{margin-bottom:10px}
+.flag li{margin:8px 0;font-size:15px}
+.flag mark{background:var(--hl);color:var(--hl-ink);padding:0 3px;border-radius:3px}
+.note{color:var(--muted);font-size:14px;margin:6px 0}
+
+/* finance */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px}
+.pill{background:var(--hl);color:var(--hl-ink);border-radius:999px;padding:2px 14px;font-weight:600;font-size:14px}
+details.rates{margin:0 0 16px;background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:10px 16px}
+details.rates summary{cursor:pointer;font-weight:600}
+.rate-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin:12px 0}
+.rate{display:flex;align-items:center;gap:8px;font-size:14px}
+.rate input{width:100px;padding:5px 8px}
+.stm{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.tbl{overflow-x:auto;max-width:100%}
+.ledger{width:100%;border-collapse:collapse;min-width:430px}
+.ledger th,.ledger td{padding:4px 6px;font-size:14px;line-height:1.5}
+.ledger thead th{font-weight:600;text-align:end;color:var(--muted);border-bottom:1.5px solid var(--ink);white-space:nowrap}
+.ledger thead th:first-child{text-align:start}
+.ledger tbody th{font-weight:400;text-align:start}
+.ledger td{text-align:end}
+.ledger tr.head th{font-family:var(--f-display);font-weight:700;font-size:15px;padding-top:14px;text-align:start}
+.ledger tr.r-calc th,.ledger tr.r-calc td{font-weight:700;border-top:1px solid var(--ink)}
+.ledger tr.r-memo th,.ledger tr.r-memo td{font-style:italic;color:var(--muted)}
+.ledger tr.r-final th,.ledger tr.r-final td{border-bottom:3px double var(--ink)}
+.ledger tr.r-diff th,.ledger tr.r-diff td{font-weight:500;color:var(--muted);border-top:1px dashed var(--line)}
+.ledger tr.r-diff.bad th,.ledger tr.r-diff.bad td{color:var(--bad);font-weight:700}
+.amt{width:100%;min-width:100px;text-align:end;direction:ltr;font:inherit;font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.bal{margin-top:10px;font-weight:600;font-size:14px}
+.bal.ok{color:var(--good)}.bal.bad{color:var(--bad)}
+.rgroup{margin-top:22px}
+.rgroup h4{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 8px;color:var(--ink)}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:10px}
+.rcard{background:var(--sheet);border:1px solid var(--line);border-inline-start:6px solid var(--line);border-radius:8px;padding:8px 12px}
+.rcard.good{border-inline-start-color:var(--f-good)}.rcard.fair{border-inline-start-color:var(--f-warn)}.rcard.weak{border-inline-start-color:var(--f-bad)}
+.rname{font-size:14px;color:var(--muted);line-height:1.4}
+.rval{font-family:var(--f-display);font-size:26px;font-weight:700;line-height:1.3;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font:600 12px/1.6 var(--f-body);border-radius:999px;padding:0 10px;display:inline-flex;gap:4px;align-items:center}
+.badge.good{background:var(--good-bg);color:var(--good)}.badge.fair{background:var(--warn-bg);color:var(--warn)}.badge.weak{background:var(--bad-bg);color:var(--bad)}
+.rmeta{font-size:12.5px;color:var(--muted);line-height:1.5;display:flex;flex-wrap:wrap;gap:0 14px}
+.dupont{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:8px}
+.dupont>div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 14px;font-family:var(--f-display);font-size:20px;font-weight:700;display:flex;flex-direction:column}
+.dupont>div small{font:400 12.5px/1.4 var(--f-body);color:var(--muted)}
+.dupont>div.eq{background:var(--hl);color:var(--hl-ink);border-color:var(--ink)}
+.dupont>div.eq small{color:var(--hl-ink)}
+.dupont>span{font-size:22px;color:var(--muted)}
+.cbar{display:flex;height:28px;border-radius:6px;overflow:hidden;border:1.5px solid var(--ink);direction:ltr}
+.cbar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend em{width:12px;height:12px;border-radius:3px;display:inline-block}
+.k-cogs{background:var(--k1)}.k-opex{background:var(--k2)}.k-da{background:var(--k3)}.k-int{background:var(--k4)}.k-tax{background:var(--k5)}.k-ni{background:var(--k6)}
+.ins{list-style:none;margin:0;padding:0}
+.ins li{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:9px 0;border-top:1px dashed var(--line)}
+.ins li:first-child{border-top:0}
+.ins .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:800 13px/1 var(--f-body);margin-top:3px}
+.ins .good .ic{background:var(--good-bg);color:var(--good)}
+.ins .risk .ic{background:var(--bad-bg);color:var(--bad)}
+.ins .info .ic{background:var(--warn-bg);color:var(--warn)}
+.hv{width:100%;border-collapse:collapse;min-width:520px;margin-bottom:14px}
+.hv th,.hv td{padding:4px 8px;font-size:14px;border-bottom:1px solid var(--line)}
+.hv thead th{color:var(--muted);font-weight:600;border-bottom:1.5px solid var(--ink);text-align:end;white-space:nowrap}
+.hv thead th:first-child,.hv tbody th{text-align:start}
+.hv tbody th{font-weight:400}
+.hv td{text-align:end}
+.empty{color:var(--muted)}
+.foot{color:var(--muted);font-size:14px;padding:12px 0 36px;max-width:80ch}
+
+@media (max-width:820px){
+  .rtop,.stm,.grid2{grid-template-columns:1fr}
+  .rtop{gap:22px}
+}
+@media (max-width:520px){
+  .doors{grid-template-columns:1fr}
+  .brand{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="17" width="4" height="8" fill="currentColor"/><rect x="14" y="11" width="4" height="14" fill="currentColor"/><rect x="21" y="6" width="4" height="19" fill="#2740d8"/></svg>
+      <span data-i18n="app_name"></span>
+    </div>
+    <div class="navlinks">
+      <a href="pages/about.html" class="about-link" id="aboutLink">About</a>
+      <a href="pages/terms.html" class="about-link" id="termsLink">Terms</a>
+    </div>
+    <div class="ctrls">
+      <div class="lang" id="langSeg" role="group" aria-label="Language"></div>
+      <label class="sel"><span data-i18n="cur"></span><select id="curSel"></select></label>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1 data-i18n="tagline"></h1>
+    <p data-i18n="badge"></p>
+  </section>
+
+  <div class="doors" role="tablist">
+    <button class="door" role="tab" id="tab-docs" aria-selected="true" aria-controls="panel-docs" data-tab="docs"><b data-i18n="tab_docs"></b><span data-i18n="tab_docs_d"></span></button>
+    <button class="door" role="tab" id="tab-fin" aria-selected="false" aria-controls="panel-fin" data-tab="fin"><b data-i18n="tab_fin"></b><span data-i18n="tab_fin_d"></span></button>
+  </div>
+
+  <section id="panel-docs" role="tabpanel" aria-labelledby="tab-docs">
+    <div class="sheet">
+      <span class="lbl" data-i18n="doc_type"></span>
+      <div class="chips" id="typeSeg" role="radiogroup"></div>
+      <label class="lbl" for="docText" data-i18n="doc_input"></label>
+      <textarea id="docText" data-i18n-ph="doc_ph" spellcheck="false"></textarea>
+      <div class="row">
+        <label class="btn ghost file"><input type="file" id="fileIn" accept=".txt,.md,.docx"><span data-i18n="doc_upload"></span></label>
+        <span class="hint" data-i18n="doc_pdf"></span>
+      </div>
+      <div class="grid2">
+        <label class="field" id="fTarget"><span data-i18n="doc_target"></span><input type="number" id="targetWords" min="0" inputmode="numeric"></label>
+        <label class="field"><span id="kwLabel" data-i18n="doc_kw"></span><input type="text" id="kwIn"></label>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="btnAnalyze" type="button" data-i18n="btn_analyze"></button>
+        <button class="btn" id="btnSample" type="button" data-i18n="btn_sample"></button>
+        <button class="btn ghost" id="btnClear" type="button" data-i18n="btn_clear"></button>
+      </div>
+      <p class="msg" id="docMsg" role="status"></p>
+    </div>
+    <div id="docResult"></div>
+  </section>
+
+  <section id="panel-fin" role="tabpanel" aria-labelledby="tab-fin" hidden>
+    <p class="hint" style="margin-bottom:14px;max-width:70ch" data-i18n="fin_intro"></p>
+    <div class="toolbar">
+      <label class="btn ghost file"><input type="file" id="finFileIn" accept=".csv,.txt,.xlsx"><span data-i18n="fin_upload"></span></label>
+      <label class="sel"><span data-i18n="fin_apply_to"></span>
+        <select id="finPeriodSel">
+          <option value="cur" data-i18n="fin_curp"></option>
+          <option value="prev" data-i18n="fin_prevp"></option>
+        </select>
+      </label>
+      <button class="btn" id="finSample" type="button" data-i18n="btn_sample"></button>
+      <button class="btn ghost" id="finClear" type="button" data-i18n="btn_clear"></button>
+      <span class="pill" id="finCurNote"></span>
+    </div>
+    <p class="hint" data-i18n="fin_upload_hint" style="margin:-6px 0 14px"></p>
+    <p class="msg info" id="finMsg" role="status"></p>
+    <details class="rates">
+      <summary data-i18n="rates_t"></summary>
+      <p class="hint" style="margin-top:8px" data-i18n="rates_h"></p>
+      <div class="rate-grid" id="ratesGrid"></div>
+      <p class="hint" data-i18n="rates_n"></p>
+    </details>
+    <div class="stm">
+      <div class="sheet"><h2 data-i18n="fin_is"></h2><div class="tbl"><table class="ledger" id="tblIS"></table></div></div>
+      <div class="sheet"><h2 data-i18n="fin_bs"></h2><div class="tbl"><table class="ledger" id="tblBS"></table></div><div class="bal" id="balBadge"></div></div>
+    </div>
+    <div id="finResult"></div>
+  </section>
+</main>
+<footer class="wrap foot" data-i18n="foot"></footer>
+<script>
+window.I18N={};
+I18N.en={
+app_name:"Tajzia",
+tagline:"Analyze CVs, assignments, research reports, theses and financial statements, instantly and privately.",
+badge:"No AI involved. Everything runs in your browser and nothing you paste is uploaded.",
+lang:"Language",cur:"Currency",nav_about:"About",nav_terms:"Terms",
+tab_docs:"Document analysis",tab_docs_d:"CVs, assignments, reports, theses",
+tab_fin:"Financial analysis",tab_fin_d:"Balance sheet and income statement ratios",
+foot:"Rule-based analysis: it highlights structure, language and ratio patterns. It does not replace human review and cannot detect plagiarism.",
+rates_t:"Exchange rates (approximate and editable)",rates_h:"1 USD equals:",rates_n:"These are rough default rates, not live. Edit them to match today's rates.",
+doc_type:"Document type",type_cv:"CV / Résumé",type_asg:"Assignment / Essay",type_rep:"Research report",type_thesis:"Thesis / Dissertation",
+doc_input:"Your text",doc_ph:"Paste the full text of your document here…",
+doc_upload:"Upload file (.txt, .md, .docx)",doc_pdf:"Have a PDF? Copy its text and paste it above.",
+doc_target:"Required word count (optional)",doc_kw:"Keywords or topics to cover (optional, comma-separated)",doc_kw_cv:"Keywords from the job ad (optional, comma-separated)",
+btn_analyze:"Analyze",btn_sample:"Load sample",btn_clear:"Clear",btn_copy:"Copy summary",copied:"Copied",copyfail:"Copy is blocked here. Please select and copy manually.",
+sample_note:"Sample text loaded (fictional content, for demonstration).",
+err_empty:"Please paste or upload some text first.",err_short:"The text is very short, so results may be unreliable.",err_file:"Could not read this file. Please paste the text instead.",err_docx:"DOCX reading is unavailable right now. Please paste the text instead.",
+res_overall:"Overall score",g_excellent:"Excellent",g_good:"Good",g_fair:"Fair",g_work:"Needs work",
+cat_structure:"Structure",cat_content:"Content",cat_language:"Clarity and language",cat_evidence:"Evidence and impact",
+st_pass:"Good",st_warn:"Improve",st_fail:"Fix",
+s_words:"Words",s_sent:"Sentences",s_para:"Paragraphs",s_avg:"Avg. sentence length",s_ease:"Reading ease",s_uniq:"Unique words",s_time:"Reading time",min:"min",
+res_fix:"Fix these first",res_checks:"Detailed checks",res_kw:"Most-used words",res_flag:"Sentences worth reviewing",flag_long:"Very long",flag_passive:"Passive voice",flag_none:"Nothing flagged.",
+res_note:"Readability, passive-voice and filler-word checks are designed for English text.",
+res_disc:"Rule-based check. It is not a grade and not a plagiarism check.",na:"n/a",
+s_abstract:"Abstract",s_intro:"Introduction",s_lit:"Literature review",s_method:"Methodology",s_results:"Results / findings",s_disc:"Discussion",s_concl:"Conclusion",s_refs:"References",
+s_exp:"Experience",s_edu:"Education",s_skills:"Skills",s_sum:"Summary / objective",m_email:"email",m_phone:"phone number",
+k_length:"Length",f_length:"{words} words. Aim for roughly {min} to {max}.",
+k_sentlen:"Average sentence length",f_sentlen:"Average is {avg} words per sentence; aim for 14 to 24.",
+k_longsent:"Very long sentences",f_longsent:"{n} sentence(s) run past 40 words. Split them.",
+k_ease:"Readability",f_ease:"Reading-ease score is {score}. Use shorter sentences and simpler words.",
+k_passive:"Passive voice",f_passive:"{pct}% of sentences look passive. Prefer active voice where you can.",
+k_weak:"Filler words",f_weak:"Found {n} filler words (e.g. {list}). Cut them or use precise wording.",
+k_hygiene:"Formatting hygiene",f_hygiene:"{n} small issues: double spaces, repeated punctuation or a lowercase “i”.",
+k_paras:"Paragraphing",f_paras:"Paragraph structure needs work ({n} paragraphs, {avg} words on average). Give each idea its own paragraph.",
+k_trans:"Linking words",f_trans:"Only {n} linking words per 1,000 words. Add words like however, therefore, for example.",
+k_contr:"Formal tone",f_contr:"Found {n} contractions (don't, it's…). Write them out in formal work.",
+k_contact:"Contact details",f_contact:"Missing: {missing}. Recruiters must be able to reach you.",
+k_sections:"Key sections",f_sections:"Missing sections: {missing}.",
+k_summary:"Professional summary",f_summary:"Add a 2 to 3 line summary or objective at the top.",
+k_dates:"Dates on roles and education",f_dates:"Few dates found ({n}). Add start and end dates for each role and qualification.",
+k_verbs:"Action verbs",f_verbs:"Only {n} strong action verbs. Start bullets with verbs like led, built, improved, delivered.",
+k_metrics:"Measurable results",f_metrics:"Only {n} quantified results. Add numbers: %, amounts, team size, users, time saved.",
+k_cliches:"Clichés",f_cliches:"Found clichés ({list}). Replace them with concrete proof.",
+k_pron:"First-person pronouns",f_pron:"Found {n} uses of I/my/me. CVs normally leave them out.",
+k_intro:"Introduction with a clear aim",f_intro:"State your topic and aim early, e.g. “This essay examines…”.",
+k_concl:"Conclusion",f_concl:"No clear conclusion found. Finish by summarizing your main points.",
+k_cites:"In-text citations",f_cites:"Found {n} citations. Support key claims with sources, e.g. (Author, 2020).",
+k_refs:"Reference list",f_refs:"No References or Bibliography section found.",
+k_rsec:"Expected sections",f_rsec:"Missing sections: {missing}.",
+k_abs:"Abstract length",f_abs:"Abstract is {n} words (or missing). Aim for 150 to 300 words.",
+k_rq:"Research questions and objectives",f_rq:"State your research questions, hypotheses or objectives clearly.",
+k_meth:"Methodology detail",f_meth:"Only {n} method-related terms. Describe sample, data collection and analysis.",
+k_stats:"Results evidence",f_stats:"Little statistical or results language ({n} kinds). Report figures, tests and effect sizes.",
+k_cdens:"Citation density",f_cdens:"{n} citations per 1,000 words. Aim for at least 4.",
+k_rcount:"Reference count",f_rcount:"{n} references found; expected at least {min}.",
+k_recent:"Recent sources",f_recent:"Only {pct}% of sources are from the last 10 years. Add newer research.",
+k_limits:"Limitations and future work",f_limits:"Add limitations and recommendations for future research.",
+k_kw:"Keyword coverage",f_kw:"Covered {pct}%. Missing: {missing}.",
+fin_upload:"Upload statement (CSV, TXT, XLSX)",fin_apply_to:"Apply to",
+fin_upload_hint:"Works best with one label and one amount per line or row (e.g. \"Revenue, 1250000\"). Review every field after uploading — automatic matching can miss or misread rows.",
+fin_matched:"Matched {n} field(s):",fin_unmatched:"Not recognized: {n} row(s).",
+err_fin_file:"Could not read this file. Try CSV, TXT or XLSX, or enter figures manually.",
+err_fin_xlsx:"Spreadsheet reading is unavailable right now. Please use CSV/TXT or enter figures manually.",
+err_fin_empty:"No recognizable label-and-amount pairs were found in this file.",
+fin_intro:"Enter your figures for the current and previous period, or upload a statement file. Ratios and insights are calculated instantly in your browser with standard formulas, no AI.",
+fin_curp:"Current period",fin_prevp:"Previous period",fin_is:"Income statement",fin_bs:"Balance sheet",fin_in:"Amounts in {c}",
+fin_res:"Analysis",fin_score:"Financial health",h_strong:"Strong",h_fair:"Moderate",h_weak:"Weak",
+fin_empty:"Enter some figures to see the analysis.",
+fin_note:"Ratios use end-of-period balances. Benchmarks are general rules of thumb, so compare with your own industry.",
+is_rev:"Revenue (net sales)",is_cogs:"Cost of goods sold",is_gp:"Gross profit",is_opex:"Operating expenses",is_da:"Depreciation and amortization",is_ebit:"Operating income (EBIT)",is_ebitda:"EBITDA",is_int:"Interest expense",is_oth:"Other income / (expense)",is_ebt:"Profit before tax",is_tax:"Income tax expense",is_ni:"Net income",
+bs_assets:"Assets",bs_cash:"Cash and equivalents",bs_ar:"Accounts receivable",bs_inv:"Inventory",bs_oca:"Other current assets",bs_tca:"Total current assets",bs_ppe:"Property, plant and equipment (net)",bs_ona:"Other non-current assets",bs_ta:"Total assets",
+bs_liab:"Liabilities",bs_ap:"Accounts payable",bs_std:"Short-term debt",bs_ocl:"Other current liabilities",bs_tcl:"Total current liabilities",bs_ltd:"Long-term debt",bs_oncl:"Other non-current liabilities",bs_tl:"Total liabilities",
+bs_eqh:"Equity",bs_eq:"Total shareholders' equity",bs_tle:"Total liabilities and equity",bs_diff:"Difference (should be 0)",bs_ok:"Balance sheet balances",bs_bad:"Balance sheet does not balance",
+rc_liq:"Liquidity",rc_prof:"Profitability",rc_lev:"Leverage",rc_eff:"Efficiency",rc_gro:"Growth",
+r_current:"Current ratio",r_quick:"Quick ratio",r_cash:"Cash ratio",r_wc:"Working capital",r_gm:"Gross margin",r_om:"Operating margin",r_ebitdam:"EBITDA margin",r_nm:"Net margin",r_roa:"Return on assets (ROA)",r_roe:"Return on equity (ROE)",
+r_de:"Debt-to-equity",r_dr:"Debt ratio",r_em:"Equity multiplier",r_icr:"Interest coverage",r_at:"Asset turnover",r_invt:"Inventory turnover",r_dio:"Days inventory (DIO)",r_dso:"Days receivable (DSO)",r_dpo:"Days payable (DPO)",r_ccc:"Cash conversion cycle",r_revg:"Revenue growth",r_nig:"Net income growth",
+bench:"Healthy",prev:"Previous",u_days:"days",
+dp_t:"DuPont breakdown of ROE",dp_n:"ROE = net margin × asset turnover × equity multiplier",
+cs_t:"Where each unit of revenue goes",hv_t:"Horizontal and vertical analysis",c_item:"Item",c_chg:"Change",c_pr:"% of revenue",c_pa:"% of assets",ins_t:"Key insights",
+i_bal:"The balance sheet does not balance: assets differ from liabilities + equity by {diff}. Check your entries.",
+i_loss:"The business made a net loss of {ni} in the current period.",
+i_nm:"Healthy net margin of {v}: about {v} of each unit of revenue is kept as profit.",
+i_cr_low:"Current ratio is {v} (below 1): short-term liabilities exceed short-term assets, a liquidity risk.",
+i_cr_good:"Current ratio of {v} shows comfortable short-term liquidity.",
+i_lev_hi:"Debt-to-equity is {v}: the company relies heavily on borrowed money.",
+i_lev_lo:"Debt-to-equity of {v} indicates conservative borrowing.",
+i_icr_low:"Interest coverage is only {v}: operating profit barely covers interest.",
+i_icr_good:"Interest coverage of {v} means interest is comfortably covered.",
+i_rev_up:"Revenue grew {v} versus the previous period.",
+i_rev_dn:"Revenue fell {v} versus the previous period.",
+i_nm_up:"Net margin improved from {a} to {b}.",
+i_nm_dn:"Net margin declined from {a} to {b}.",
+i_dso:"Customers take about {v} days to pay. Collections are slow and tie up cash.",
+i_ccc:"The cash conversion cycle is {v} days, so cash stays tied up in operations for a long time.",
+i_roe_lev:"ROE of {roe} is boosted by leverage (equity multiplier {em}); check the debt risk.",
+i_eq_neg:"Shareholders' equity is negative, meaning liabilities exceed assets."
+};
+I18N.ur={
+app_name:"تجزیہ",
+tagline:"سی وی، اسائنمنٹ، تحقیقی رپورٹ، تھیسس اور مالیاتی گوشواروں کا فوری اور نجی تجزیہ کریں۔",
+badge:"اے آئی استعمال نہیں ہوتا۔ سب کچھ آپ کے براؤزر میں چلتا ہے اور جو کچھ آپ پیسٹ کریں وہ اپلوڈ نہیں ہوتا۔",
+lang:"زبان",cur:"کرنسی",nav_about:"تعارف",nav_terms:"شرائط",
+tab_docs:"دستاویز کا تجزیہ",tab_docs_d:"سی وی، اسائنمنٹ، رپورٹس، تھیسس",
+tab_fin:"مالیاتی تجزیہ",tab_fin_d:"میزانیہ اور آمدنی کے گوشوارے کے تناسب",
+foot:"یہ قواعد پر مبنی تجزیہ ہے: یہ ساخت، زبان اور مالی تناسب کے رجحانات کی نشاندہی کرتا ہے۔ یہ انسانی جانچ کا متبادل نہیں اور سرقہ (plagiarism) کا پتہ نہیں لگا سکتا۔",
+rates_t:"زرِ مبادلہ کی شرحیں (تخمینی اور قابلِ ترمیم)",rates_h:"1 امریکی ڈالر برابر ہے:",rates_n:"یہ تقریبی ڈیفالٹ شرحیں ہیں، لائیو نہیں۔ آج کی شرح کے مطابق خود تبدیل کریں۔",
+doc_type:"دستاویز کی قسم",type_cv:"سی وی / ریزیومے",type_asg:"اسائنمنٹ / مضمون",type_rep:"تحقیقی رپورٹ",type_thesis:"تھیسس / مقالہ",
+doc_input:"آپ کا متن",doc_ph:"اپنی دستاویز کا مکمل متن یہاں پیسٹ کریں…",
+doc_upload:"فائل اپلوڈ کریں (.txt، .md، .docx)",doc_pdf:"پی ڈی ایف ہے؟ اس کا متن کاپی کر کے اوپر پیسٹ کریں۔",
+doc_target:"مطلوبہ الفاظ کی تعداد (اختیاری)",doc_kw:"شامل کرنے کے لیے کلیدی الفاظ یا موضوعات (اختیاری، کاما سے الگ کریں)",doc_kw_cv:"ملازمت کے اشتہار سے کلیدی الفاظ (اختیاری، کاما سے الگ کریں)",
+btn_analyze:"تجزیہ کریں",btn_sample:"نمونہ لوڈ کریں",btn_clear:"صاف کریں",btn_copy:"خلاصہ کاپی کریں",copied:"کاپی ہو گیا",copyfail:"یہاں کاپی بلاک ہے۔ براہِ کرم خود منتخب کر کے کاپی کریں۔",
+sample_note:"نمونہ متن لوڈ ہو گیا (فرضی مواد، صرف مظاہرے کے لیے)۔",
+err_empty:"پہلے کچھ متن پیسٹ یا اپلوڈ کریں۔",err_short:"متن بہت مختصر ہے، اس لیے نتائج قابلِ اعتماد نہیں ہو سکتے۔",err_file:"یہ فائل پڑھی نہیں جا سکی۔ براہِ کرم متن پیسٹ کریں۔",err_docx:"DOCX پڑھنا اس وقت دستیاب نہیں۔ براہِ کرم متن پیسٹ کریں۔",
+res_overall:"مجموعی اسکور",g_excellent:"شاندار",g_good:"اچھا",g_fair:"مناسب",g_work:"بہتری درکار",
+cat_structure:"ساخت",cat_content:"مواد",cat_language:"وضاحت اور زبان",cat_evidence:"ثبوت اور اثر",
+st_pass:"ٹھیک",st_warn:"بہتر کریں",st_fail:"درست کریں",
+s_words:"الفاظ",s_sent:"جملے",s_para:"پیراگراف",s_avg:"جملے کی اوسط لمبائی",s_ease:"پڑھنے میں آسانی",s_uniq:"منفرد الفاظ",s_time:"پڑھنے کا وقت",min:"منٹ",
+res_fix:"پہلے یہ درست کریں",res_checks:"تفصیلی جانچ",res_kw:"سب سے زیادہ استعمال ہونے والے الفاظ",res_flag:"قابلِ نظرِ ثانی جملے",flag_long:"بہت لمبے",flag_passive:"مجہول (Passive) انداز",flag_none:"کچھ نشان زد نہیں ہوا۔",
+res_note:"پڑھنے میں آسانی، مجہول جملوں اور فالتو الفاظ کی جانچ انگریزی متن کے لیے بنائی گئی ہے۔",
+res_disc:"یہ قواعد پر مبنی جانچ ہے۔ نہ یہ گریڈ ہے اور نہ سرقہ کی جانچ۔",na:"دستیاب نہیں",
+s_abstract:"خلاصہ (Abstract)",s_intro:"تعارف",s_lit:"ادبیات کا جائزہ",s_method:"طریقۂ کار",s_results:"نتائج",s_disc:"بحث",s_concl:"نتیجہ",s_refs:"حوالہ جات",
+s_exp:"تجربہ",s_edu:"تعلیم",s_skills:"مہارتیں",s_sum:"خلاصہ / مقصد",m_email:"ای میل",m_phone:"فون نمبر",
+k_length:"طوالت",f_length:"{words} الفاظ۔ تقریباً {min} سے {max} کے درمیان رکھیں۔",
+k_sentlen:"جملے کی اوسط لمبائی",f_sentlen:"اوسط {avg} الفاظ فی جملہ ہے؛ 14 سے 24 کے درمیان رکھیں۔",
+k_longsent:"بہت لمبے جملے",f_longsent:"{n} جملے 40 الفاظ سے زیادہ لمبے ہیں۔ انہیں توڑ دیں۔",
+k_ease:"پڑھنے کی آسانی",f_ease:"آسانی کا اسکور {score} ہے۔ چھوٹے جملے اور سادہ الفاظ استعمال کریں۔",
+k_passive:"مجہول انداز",f_passive:"{pct}% جملے مجہول لگتے ہیں۔ جہاں ممکن ہو معروف انداز اپنائیں۔",
+k_weak:"فالتو الفاظ",f_weak:"{n} فالتو الفاظ ملے (مثلاً {list})۔ انہیں حذف کریں یا واضح الفاظ سے بدلیں۔",
+k_hygiene:"فارمیٹنگ کی صفائی",f_hygiene:"{n} چھوٹی خامیاں: دہرے اسپیس، بار بار وقفے کے نشان یا چھوٹا “i”۔",
+k_paras:"پیراگراف بندی",f_paras:"پیراگراف کی ساخت بہتر کریں ({n} پیراگراف، اوسطاً {avg} الفاظ)۔ ہر خیال کے لیے الگ پیراگراف رکھیں۔",
+k_trans:"جوڑنے والے الفاظ",f_trans:"ہر 1,000 الفاظ میں صرف {n} جوڑنے والے الفاظ ہیں۔ however، therefore، for example جیسے الفاظ شامل کریں۔",
+k_contr:"رسمی انداز",f_contr:"{n} اختصاری صورتیں ملیں (don't، it's…)۔ رسمی تحریر میں انہیں مکمل لکھیں۔",
+k_contact:"رابطے کی تفصیلات",f_contact:"غائب: {missing}۔ بھرتی کرنے والے کو آپ سے رابطہ کرنے کے قابل ہونا چاہیے۔",
+k_sections:"اہم حصے",f_sections:"غائب حصے: {missing}۔",
+k_summary:"پیشہ ورانہ خلاصہ",f_summary:"اوپر 2 سے 3 سطروں کا خلاصہ یا مقصد شامل کریں۔",
+k_dates:"عہدوں اور تعلیم کی تاریخیں",f_dates:"بہت کم تاریخیں ملیں ({n})۔ ہر ملازمت اور ڈگری کی شروع اور اختتامی تاریخ لکھیں۔",
+k_verbs:"عملی افعال (Action verbs)",f_verbs:"صرف {n} مضبوط عملی افعال ہیں۔ led، built، improved، delivered جیسے افعال سے جملے شروع کریں۔",
+k_metrics:"قابلِ پیمائش نتائج",f_metrics:"صرف {n} اعداد و شمار پر مبنی نتائج ہیں۔ فیصد، رقم، ٹیم کا حجم، صارفین یا بچایا گیا وقت لکھیں۔",
+k_cliches:"گھسے پٹے فقرے",f_cliches:"گھسے پٹے فقرے ملے ({list})۔ ان کی جگہ ٹھوس ثبوت دیں۔",
+k_pron:"واحد متکلم ضمیر",f_pron:"I/my/me کا {n} بار استعمال ملا۔ سی وی میں عموماً یہ نہیں لکھے جاتے۔",
+k_intro:"واضح مقصد والا تعارف",f_intro:"موضوع اور مقصد شروع میں بیان کریں، مثلاً “This essay examines…”۔",
+k_concl:"نتیجہ",f_concl:"واضح نتیجہ نہیں ملا۔ اپنے اہم نکات کے خلاصے پر تحریر ختم کریں۔",
+k_cites:"متن کے اندر حوالے",f_cites:"{n} حوالے ملے۔ اہم دعووں کے لیے ماخذ دیں، مثلاً (Author, 2020)۔",
+k_refs:"حوالہ جات کی فہرست",f_refs:"References یا Bibliography کا حصہ نہیں ملا۔",
+k_rsec:"مطلوبہ حصے",f_rsec:"غائب حصے: {missing}۔",
+k_abs:"خلاصے (Abstract) کی طوالت",f_abs:"خلاصہ {n} الفاظ کا ہے (یا موجود نہیں)۔ 150 سے 300 الفاظ رکھیں۔",
+k_rq:"تحقیقی سوالات اور مقاصد",f_rq:"اپنے تحقیقی سوالات، مفروضے یا مقاصد واضح لکھیں۔",
+k_meth:"طریقۂ کار کی تفصیل",f_meth:"طریقۂ کار سے متعلق صرف {n} اصطلاحات ہیں۔ نمونہ، ڈیٹا جمع کرنے اور تجزیے کا طریقہ بیان کریں۔",
+k_stats:"نتائج کے ثبوت",f_stats:"اعداد و شمار یا نتائج کی زبان کم ہے ({n} اقسام)۔ اعداد، ٹیسٹ اور نتائج کی اہمیت بیان کریں۔",
+k_cdens:"حوالوں کی کثافت",f_cdens:"ہر 1,000 الفاظ میں {n} حوالے ہیں۔ کم از کم 4 رکھیں۔",
+k_rcount:"حوالہ جات کی تعداد",f_rcount:"{n} حوالہ جات ملے؛ کم از کم {min} متوقع ہیں۔",
+k_recent:"حالیہ ماخذ",f_recent:"صرف {pct}% ماخذ پچھلے 10 سالوں کے ہیں۔ نئی تحقیق شامل کریں۔",
+k_limits:"حدود اور آئندہ کام",f_limits:"تحقیق کی حدود اور آئندہ تحقیق کے لیے سفارشات شامل کریں۔",
+k_kw:"کلیدی الفاظ کی شمولیت",f_kw:"{pct}% شامل ہیں۔ غائب: {missing}۔",
+fin_upload:"گوشوارہ اپلوڈ کریں (CSV، TXT، XLSX)",fin_apply_to:"یہاں لاگو کریں",
+fin_upload_hint:"بہترین نتیجہ تب ملتا ہے جب ہر سطر میں ایک عنوان اور ایک رقم ہو (مثلاً “Revenue, 1250000”)۔ اپلوڈ کے بعد ہر خانہ ضرور چیک کریں — خودکار میچنگ کچھ سطریں چھوڑ یا غلط پڑھ سکتی ہے۔",
+fin_matched:"{n} خانے ملے:",fin_unmatched:"پہچانی نہ جا سکیں: {n} سطریں۔",
+err_fin_file:"یہ فائل پڑھی نہیں جا سکی۔ CSV، TXT یا XLSX آزمائیں، یا اعداد خود درج کریں۔",
+err_fin_xlsx:"اسپریڈشیٹ پڑھنا اس وقت دستیاب نہیں۔ براہِ کرم CSV/TXT استعمال کریں یا اعداد خود درج کریں۔",
+err_fin_empty:"اس فائل میں عنوان اور رقم کا کوئی قابلِ شناخت جوڑا نہیں ملا۔",
+fin_intro:"موجودہ اور پچھلی مدت کے اعداد و شمار درج کریں، یا کوئی گوشوارہ فائل اپلوڈ کریں۔ تناسب اور نتائج معیاری فارمولوں کے ذریعے آپ کے براؤزر میں فوراً نکلتے ہیں، اے آئی کے بغیر۔",
+fin_curp:"موجودہ مدت",fin_prevp:"پچھلی مدت",fin_is:"آمدنی کا گوشوارہ (Income Statement)",fin_bs:"میزانیہ (Balance Sheet)",fin_in:"رقوم {c} میں",
+fin_res:"تجزیہ",fin_score:"مالی صحت",h_strong:"مضبوط",h_fair:"درمیانہ",h_weak:"کمزور",
+fin_empty:"تجزیہ دیکھنے کے لیے کچھ اعداد درج کریں۔",
+fin_note:"تناسب مدت کے اختتامی بیلنس پر مبنی ہیں۔ معیارات عمومی اصول ہیں، اس لیے اپنی صنعت سے موازنہ کریں۔",
+is_rev:"آمدنی (خالص فروخت)",is_cogs:"فروخت شدہ مال کی لاگت",is_gp:"مجموعی منافع",is_opex:"آپریٹنگ اخراجات",is_da:"فرسودگی اور تخفیفِ قدر",is_ebit:"آپریٹنگ آمدنی (EBIT)",is_ebitda:"EBITDA",is_int:"سود کا خرچ",is_oth:"دیگر آمدنی / (خرچ)",is_ebt:"ٹیکس سے پہلے منافع",is_tax:"انکم ٹیکس کا خرچ",is_ni:"خالص منافع",
+bs_assets:"اثاثے",bs_cash:"نقد اور مساوی",bs_ar:"قابلِ وصول کھاتے",bs_inv:"انوینٹری (اسٹاک)",bs_oca:"دیگر رواں اثاثے",bs_tca:"کل رواں اثاثے",bs_ppe:"جائیداد، پلانٹ اور مشینری (خالص)",bs_ona:"دیگر غیر رواں اثاثے",bs_ta:"کل اثاثے",
+bs_liab:"واجبات",bs_ap:"قابلِ ادائیگی کھاتے",bs_std:"قلیل مدتی قرض",bs_ocl:"دیگر رواں واجبات",bs_tcl:"کل رواں واجبات",bs_ltd:"طویل مدتی قرض",bs_oncl:"دیگر غیر رواں واجبات",bs_tl:"کل واجبات",
+bs_eqh:"سرمایہ",bs_eq:"کل حصص داروں کا سرمایہ",bs_tle:"کل واجبات اور سرمایہ",bs_diff:"فرق (صفر ہونا چاہیے)",bs_ok:"میزانیہ متوازن ہے",bs_bad:"میزانیہ متوازن نہیں",
+rc_liq:"روانی (Liquidity)",rc_prof:"منافع بخشی",rc_lev:"قرض کا بوجھ (Leverage)",rc_eff:"کارکردگی",rc_gro:"نمو",
+r_current:"رواں تناسب",r_quick:"فوری تناسب",r_cash:"نقد تناسب",r_wc:"ورکنگ کیپیٹل",r_gm:"مجموعی منافع کا مارجن",r_om:"آپریٹنگ مارجن",r_ebitdam:"EBITDA مارجن",r_nm:"خالص منافع کا مارجن",r_roa:"اثاثوں پر منافع (ROA)",r_roe:"سرمائے پر منافع (ROE)",
+r_de:"قرض بمقابلہ سرمایہ",r_dr:"قرض کا تناسب",r_em:"ایکویٹی ملٹی پلائر",r_icr:"سود کی ادائیگی کی صلاحیت",r_at:"اثاثوں کی گردش",r_invt:"انوینٹری کی گردش",r_dio:"انوینٹری کے دن (DIO)",r_dso:"وصولی کے دن (DSO)",r_dpo:"ادائیگی کے دن (DPO)",r_ccc:"نقدی کی گردش کا دورانیہ",r_revg:"آمدنی میں اضافہ",r_nig:"خالص منافع میں اضافہ",
+bench:"بہتر حد",prev:"پچھلی",u_days:"دن",
+dp_t:"ROE کی ڈوپونٹ (DuPont) تقسیم",dp_n:"ROE = خالص مارجن × اثاثوں کی گردش × ایکویٹی ملٹی پلائر",
+cs_t:"آمدنی کی ہر اکائی کہاں جاتی ہے",hv_t:"افقی اور عمودی تجزیہ",c_item:"مد",c_chg:"تبدیلی",c_pr:"آمدنی کا %",c_pa:"اثاثوں کا %",ins_t:"اہم نکات",
+i_bal:"میزانیہ متوازن نہیں: اثاثے اور (واجبات + سرمایہ) میں {diff} کا فرق ہے۔ اپنے اندراجات چیک کریں۔",
+i_loss:"موجودہ مدت میں کاروبار کو {ni} کا خالص نقصان ہوا۔",
+i_nm:"خالص مارجن {v} اچھا ہے: آمدنی کی ہر اکائی میں سے تقریباً {v} منافع کے طور پر بچتا ہے۔",
+i_cr_low:"رواں تناسب {v} ہے (1 سے کم): قلیل مدتی واجبات قلیل مدتی اثاثوں سے زیادہ ہیں، یہ روانی کا خطرہ ہے۔",
+i_cr_good:"رواں تناسب {v} قلیل مدتی روانی کی اچھی حالت ظاہر کرتا ہے۔",
+i_lev_hi:"قرض بمقابلہ سرمایہ {v} ہے: کمپنی قرض پر بہت زیادہ انحصار کر رہی ہے۔",
+i_lev_lo:"قرض بمقابلہ سرمایہ {v} محتاط قرض گیری کی علامت ہے۔",
+i_icr_low:"سود کی ادائیگی کی صلاحیت صرف {v} ہے: آپریٹنگ منافع مشکل سے سود پورا کرتا ہے۔",
+i_icr_good:"سود کی ادائیگی کی صلاحیت {v} ہے، یعنی سود آسانی سے ادا ہو جاتا ہے۔",
+i_rev_up:"پچھلی مدت کے مقابلے میں آمدنی {v} بڑھی۔",
+i_rev_dn:"پچھلی مدت کے مقابلے میں آمدنی {v} گھٹی۔",
+i_nm_up:"خالص مارجن {a} سے بہتر ہو کر {b} ہو گیا۔",
+i_nm_dn:"خالص مارجن {a} سے گھٹ کر {b} رہ گیا۔",
+i_dso:"گاہک تقریباً {v} دن میں ادائیگی کرتے ہیں۔ وصولی سست ہے اور نقدی پھنس جاتی ہے۔",
+i_ccc:"نقدی کی گردش کا دورانیہ {v} دن ہے، یعنی نقدی طویل عرصے تک کاروبار میں پھنسی رہتی ہے۔",
+i_roe_lev:"{roe} کا ROE قرض کے سہارے بڑھا ہے (ایکویٹی ملٹی پلائر {em})؛ قرض کے خطرے کا جائزہ لیں۔",
+i_eq_neg:"حصص داروں کا سرمایہ منفی ہے، یعنی واجبات اثاثوں سے زیادہ ہیں۔"
+};
+I18N.sd={
+app_name:"تجزيو",
+tagline:"سي وي، اسائنمينٽ، تحقيقي رپورٽ، ٿيسز ۽ مالي بيانن جو فوري ۽ نجي تجزيو ڪريو.",
+badge:"اي آءِ استعمال نٿو ٿئي. سڀ ڪجهه توهان جي برائوزر ۾ هلندو آهي ۽ جيڪو ڪجهه پيسٽ ڪريو سو اپلوڊ نٿو ٿئي.",
+lang:"ٻولي",cur:"ڪرنسي",nav_about:"تعارف",nav_terms:"شرطون",
+tab_docs:"دستاويز جو تجزيو",tab_docs_d:"سي وي، اسائنمينٽ، رپورٽون، ٿيسز",
+tab_fin:"مالي تجزيو",tab_fin_d:"بيلنس شيٽ ۽ آمدنيءَ جي بيان جا تناسب",
+foot:"هي ضابطن تي ٻڌل تجزيو آهي: اهو ساخت، ٻولي ۽ مالي تناسب جي نمونن جي نشاندهي ڪري ٿو. اهو انساني جاچ جو متبادل ناهي ۽ چوري (plagiarism) جو پتو نٿو لڳائي سگهي.",
+rates_t:"مٽا سٽا جا نرخ (اندازي وارا ۽ تبديل ڪري سگهجن ٿا)",rates_h:"1 آمريڪي ڊالر برابر آهي:",rates_n:"هي تقريبي ڊفالٽ نرخ آهن، لائيو ناهن. اڄوڪي نرخ مطابق پاڻ تبديل ڪريو.",
+doc_type:"دستاويز جو قسم",type_cv:"سي وي / ريزيوم",type_asg:"اسائنمينٽ / مضمون",type_rep:"تحقيقي رپورٽ",type_thesis:"ٿيسز / مقالو",
+doc_input:"توهان جو متن",doc_ph:"پنهنجي دستاويز جو مڪمل متن هتي پيسٽ ڪريو…",
+doc_upload:"فائل اپلوڊ ڪريو (.txt، .md، .docx)",doc_pdf:"پي ڊي ايف آهي؟ ان جو متن ڪاپي ڪري مٿي پيسٽ ڪريو.",
+doc_target:"گهربل لفظن جو تعداد (اختياري)",doc_kw:"شامل ڪرڻ لاءِ ڪلاڪي لفظ يا موضوع (اختياري، ڪاما سان ڌار ڪريو)",doc_kw_cv:"نوڪري جي اشتهار مان ڪلاڪي لفظ (اختياري، ڪاما سان ڌار ڪريو)",
+btn_analyze:"تجزيو ڪريو",btn_sample:"نمونو لوڊ ڪريو",btn_clear:"صاف ڪريو",btn_copy:"خلاصو ڪاپي ڪريو",copied:"ڪاپي ٿي ويو",copyfail:"هتي ڪاپي بلاڪ آهي. مهرباني ڪري پاڻ چونڊي ڪاپي ڪريو.",
+sample_note:"نمونو متن لوڊ ٿي ويو (فرضي مواد، صرف مظاهري لاءِ).",
+err_empty:"مهرباني ڪري پهرين ڪجهه متن پيسٽ يا اپلوڊ ڪريو.",err_short:"متن تمام مختصر آهي، تنهنڪري نتيجا ڀروسي جوڳا نه هوندا.",err_file:"هي فائل پڙهي نه سگهيو. مهرباني ڪري متن پيسٽ ڪريو.",err_docx:"DOCX پڙهڻ هن وقت موجود ناهي. مهرباني ڪري متن پيسٽ ڪريو.",
+res_overall:"ڪل اسڪور",g_excellent:"شاندار",g_good:"سٺو",g_fair:"مناسب",g_work:"بهتري گهرجي",
+cat_structure:"ساخت",cat_content:"مواد",cat_language:"وضاحت ۽ ٻولي",cat_evidence:"ثبوت ۽ اثر",
+st_pass:"ٺيڪ",st_warn:"بهتر ڪريو",st_fail:"درست ڪريو",
+s_words:"لفظ",s_sent:"جملا",s_para:"پيراگراف",s_avg:"جملي جي اوسط ڊيگهه",s_ease:"پڙهڻ ۾ آساني",s_uniq:"منفرد لفظ",s_time:"پڙهڻ جو وقت",min:"منٽ",
+res_fix:"پهرين هي درست ڪريو",res_checks:"تفصيلي جاچ",res_kw:"سڀ کان گهڻو استعمال ٿيل لفظ",res_flag:"ٻيهر ڏسڻ جوڳا جملا",flag_long:"تمام ڊگها",flag_passive:"مجهول (Passive) انداز",flag_none:"ڪجهه به نشان زد نه ٿيو.",
+res_note:"پڙهڻ ۾ آساني، مجهول جملن ۽ فالتو لفظن جي جاچ انگريزي متن لاءِ ٺاهي وئي آهي.",
+res_disc:"هي ضابطن تي ٻڌل جاچ آهي. نه گريڊ آهي ۽ نه چوري جي جاچ.",na:"موجود ناهي",
+s_abstract:"خلاصو (Abstract)",s_intro:"تعارف",s_lit:"ادب جو جائزو",s_method:"طريقو ڪار",s_results:"نتيجا",s_disc:"بحث",s_concl:"نتيجو",s_refs:"حوالا",
+s_exp:"تجربو",s_edu:"تعليم",s_skills:"مهارتون",s_sum:"خلاصو / مقصد",m_email:"اي ميل",m_phone:"فون نمبر",
+k_length:"ڊيگهه",f_length:"{words} لفظ. تقريبن {min} کان {max} جي وچ ۾ رکو.",
+k_sentlen:"جملي جي اوسط ڊيگهه",f_sentlen:"اوسط {avg} لفظ في جملو آهي؛ 14 کان 24 جي وچ ۾ رکو.",
+k_longsent:"تمام ڊگها جملا",f_longsent:"{n} جملا 40 لفظن کان وڌيڪ ڊگها آهن. انهن کي ورهايو.",
+k_ease:"پڙهڻ جي آساني",f_ease:"آساني جو اسڪور {score} آهي. ننڍا جملا ۽ سادا لفظ استعمال ڪريو.",
+k_passive:"مجهول انداز",f_passive:"{pct}% جملا مجهول لڳن ٿا. جتي ٿي سگهي معروف انداز اختيار ڪريو.",
+k_weak:"فالتو لفظ",f_weak:"{n} فالتو لفظ مليا (مثلاً {list}). انهن کي هٽايو يا واضح لفظن سان مٽايو.",
+k_hygiene:"فارميٽنگ جي صفائي",f_hygiene:"{n} ننڍيون ڪمزوريون: ٻه ڀيرا اسپيس، ورجايل وقفي جا نشان يا ننڍو “i”.",
+k_paras:"پيراگراف ورڇ",f_paras:"پيراگراف جي ساخت بهتر ڪريو ({n} پيراگراف، اوسطن {avg} لفظ). هر خيال لاءِ الڳ پيراگراف رکو.",
+k_trans:"ڳنڍيندڙ لفظ",f_trans:"هر 1,000 لفظن ۾ صرف {n} ڳنڍيندڙ لفظ آهن. however، therefore، for example جهڙا لفظ شامل ڪريو.",
+k_contr:"رسمي انداز",f_contr:"{n} اختصاري صورتون مليون (don't، it's…). رسمي لکڻي ۾ انهن کي پورو لکو.",
+k_contact:"رابطي جون تفصيل",f_contact:"غائب: {missing}. ڀرتي ڪندڙ کي توهان سان رابطو ڪرڻ جي قابل هجڻ گهرجي.",
+k_sections:"اهم حصا",f_sections:"غائب حصا: {missing}.",
+k_summary:"پيشه ورانه خلاصو",f_summary:"مٿي 2 کان 3 سِٽن جو خلاصو يا مقصد شامل ڪريو.",
+k_dates:"عهدن ۽ تعليم جون تاريخون",f_dates:"تمام ٿوريون تاريخون مليون ({n}). هر نوڪري ۽ ڊگري جي شروعات ۽ پڇاڙي جي تاريخ لکو.",
+k_verbs:"عملي فعل (Action verbs)",f_verbs:"صرف {n} مضبوط عملي فعل آهن. led، built، improved، delivered جهڙن فعلن سان جملا شروع ڪريو.",
+k_metrics:"ماپي جوڳا نتيجا",f_metrics:"صرف {n} انگن اکرن تي ٻڌل نتيجا آهن. سيڪڙو، رقم، ٽيم جو ماپ، استعمال ڪندڙ يا بچايل وقت لکو.",
+k_cliches:"گهسيل جملا",f_cliches:"گهسيل جملا مليا ({list}). انهن جي جاءِ تي ٺوس ثبوت ڏيو.",
+k_pron:"واحد متڪلم ضمير",f_pron:"I/my/me جو {n} ڀيرا استعمال مليو. سي وي ۾ عام طور اهي نه لکبا آهن.",
+k_intro:"واضح مقصد وارو تعارف",f_intro:"موضوع ۽ مقصد شروع ۾ بيان ڪريو، مثلاً “This essay examines…”.",
+k_concl:"نتيجو",f_concl:"واضح نتيجو نه مليو. پنهنجن اهم نقطن جي خلاصي تي لکڻي پوري ڪريو.",
+k_cites:"متن اندر حوالا",f_cites:"{n} حوالا مليا. اهم دعوائن لاءِ ماخذ ڏيو، مثلاً (Author, 2020).",
+k_refs:"حوالن جي فهرست",f_refs:"References يا Bibliography وارو حصو نه مليو.",
+k_rsec:"گهربل حصا",f_rsec:"غائب حصا: {missing}.",
+k_abs:"خلاصي (Abstract) جي ڊيگهه",f_abs:"خلاصو {n} لفظن جو آهي (يا موجود ناهي). 150 کان 300 لفظ رکو.",
+k_rq:"تحقيقي سوال ۽ مقصد",f_rq:"پنهنجا تحقيقي سوال، مفروضا يا مقصد واضح لکو.",
+k_meth:"طريقي ڪار جي تفصيل",f_meth:"طريقي ڪار بابت صرف {n} اصطلاح آهن. نمونو، ڊيٽا گڏ ڪرڻ ۽ تجزيي جو طريقو بيان ڪريو.",
+k_stats:"نتيجن جو ثبوت",f_stats:"انگن اکرن يا نتيجن جي ٻولي گهٽ آهي ({n} قسم). انگ، ٽيسٽ ۽ نتيجن جي اهميت بيان ڪريو.",
+k_cdens:"حوالن جي گهاٽائي",f_cdens:"هر 1,000 لفظن ۾ {n} حوالا آهن. گهٽ ۾ گهٽ 4 رکو.",
+k_rcount:"حوالن جو تعداد",f_rcount:"{n} حوالا مليا؛ گهٽ ۾ گهٽ {min} گهربل آهن.",
+k_recent:"تازا ماخذ",f_recent:"صرف {pct}% ماخذ گذريل 10 سالن جا آهن. نئين تحقيق شامل ڪريو.",
+k_limits:"حدون ۽ آئيندو ڪم",f_limits:"تحقيق جون حدون ۽ آئينده تحقيق لاءِ سفارشون شامل ڪريو.",
+k_kw:"ڪلاڪي لفظن جي شموليت",f_kw:"{pct}% شامل آهن. غائب: {missing}.",
+fin_upload:"بيان اپلوڊ ڪريو (CSV، TXT، XLSX)",fin_apply_to:"هتي لاڳو ڪريو",
+fin_upload_hint:"بهترين نتيجو تڏهن ملي ٿو جڏهن هر سٽ ۾ هڪ عنوان ۽ هڪ رقم هجي (مثال طور “Revenue, 1250000”). اپلوڊ کان پوءِ هر خانو ضرور چيڪ ڪريو — خودڪار ميچنگ ڪجهه سٽون ڇڏي يا غلط پڙهي سگهي ٿي.",
+fin_matched:"{n} خانا مليا:",fin_unmatched:"سڃاڻي نه سگهيا: {n} سٽون.",
+err_fin_file:"هي فائل پڙهي نه سگهيو. CSV، TXT يا XLSX آزمايو، يا انگ پاڻ داخل ڪريو.",
+err_fin_xlsx:"اسپريڊشيٽ پڙهڻ هن وقت موجود ناهي. مهرباني ڪري CSV/TXT استعمال ڪريو يا انگ پاڻ داخل ڪريو.",
+err_fin_empty:"هن فائل ۾ عنوان ۽ رقم جو ڪو سڃاتل جوڙو نه مليو.",
+fin_intro:"موجوده ۽ گذريل مدي جا انگ اکر داخل ڪريو، يا ڪو بيان فائل اپلوڊ ڪريو. تناسب ۽ نتيجا معياري فارمولن ذريعي توهان جي برائوزر ۾ فوري نڪرن ٿا، اي آءِ کانسواءِ.",
+fin_curp:"موجوده مدت",fin_prevp:"گذريل مدت",fin_is:"آمدنيءَ جو بيان (Income Statement)",fin_bs:"بيلنس شيٽ (Balance Sheet)",fin_in:"رقمون {c} ۾",
+fin_res:"تجزيو",fin_score:"مالي صحت",h_strong:"مضبوط",h_fair:"وچولو",h_weak:"ڪمزور",
+fin_empty:"تجزيو ڏسڻ لاءِ ڪجهه انگ داخل ڪريو.",
+fin_note:"تناسب مدت جي پڇاڙيءَ واري بيلنس تي ٻڌل آهن. معيار عام اصول آهن، تنهنڪري پنهنجي صنعت سان مقابلو ڪريو.",
+is_rev:"آمدني (خالص وڪرو)",is_cogs:"وڪرو ٿيل مال جي لاڳت",is_gp:"ڪل نفعو",is_opex:"آپريٽنگ خرچ",is_da:"گھسائي ۽ تخفيف",is_ebit:"آپريٽنگ آمدني (EBIT)",is_ebitda:"EBITDA",is_int:"سود جو خرچ",is_oth:"ٻي آمدني / (خرچ)",is_ebt:"ٽيڪس کان اڳ نفعو",is_tax:"انڪم ٽيڪس جو خرچ",is_ni:"خالص نفعو",
+bs_assets:"اثاثا",bs_cash:"نقد ۽ برابر",bs_ar:"وصول ٿيڻ جوڳا کاتا",bs_inv:"انوينٽري (اسٽاڪ)",bs_oca:"ٻيا جاري اثاثا",bs_tca:"ڪل جاري اثاثا",bs_ppe:"ملڪيت، پلانٽ ۽ مشينري (خالص)",bs_ona:"ٻيا غير جاري اثاثا",bs_ta:"ڪل اثاثا",
+bs_liab:"ذميواريون",bs_ap:"ادا ڪرڻ جوڳا کاتا",bs_std:"مختصر مدي جو قرض",bs_ocl:"ٻيون جاري ذميواريون",bs_tcl:"ڪل جاري ذميواريون",bs_ltd:"ڊگهي مدي جو قرض",bs_oncl:"ٻيون غير جاري ذميواريون",bs_tl:"ڪل ذميواريون",
+bs_eqh:"سرمايو",bs_eq:"ڪل حصيدارن جو سرمايو",bs_tle:"ڪل ذميواريون ۽ سرمايو",bs_diff:"فرق (صفر هجڻ گهرجي)",bs_ok:"بيلنس شيٽ متوازن آهي",bs_bad:"بيلنس شيٽ متوازن ناهي",
+rc_liq:"رواني (Liquidity)",rc_prof:"نفعي بخشي",rc_lev:"قرض جو بار (Leverage)",rc_eff:"ڪارڪردگي",rc_gro:"واڌارو",
+r_current:"جاري تناسب",r_quick:"فوري تناسب",r_cash:"نقد تناسب",r_wc:"ورڪنگ ڪيپيٽل",r_gm:"ڪل نفعي جو مارجن",r_om:"آپريٽنگ مارجن",r_ebitdam:"EBITDA مارجن",r_nm:"خالص نفعي جو مارجن",r_roa:"اثاثن تي نفعو (ROA)",r_roe:"سرمائي تي نفعو (ROE)",
+r_de:"قرض بمقابله سرمايو",r_dr:"قرض جو تناسب",r_em:"ايڪويٽي ملٽي پلائر",r_icr:"سود ادا ڪرڻ جي سگهه",r_at:"اثاثن جي گردش",r_invt:"انوينٽري جي گردش",r_dio:"انوينٽري جا ڏينهن (DIO)",r_dso:"وصولي جا ڏينهن (DSO)",r_dpo:"ادائيگي جا ڏينهن (DPO)",r_ccc:"نقد گردش جو عرصو",r_revg:"آمدني ۾ واڌارو",r_nig:"خالص نفعي ۾ واڌارو",
+bench:"سٺي حد",prev:"گذريل",u_days:"ڏينهن",
+dp_t:"ROE جي ڊيو پانٽ (DuPont) ورڇ",dp_n:"ROE = خالص مارجن × اثاثن جي گردش × ايڪويٽي ملٽي پلائر",
+cs_t:"آمدنيءَ جو هر يونٽ ڪٿي وڃي ٿو",hv_t:"افقي ۽ عمودي تجزيو",c_item:"مد",c_chg:"تبديلي",c_pr:"آمدنيءَ جو %",c_pa:"اثاثن جو %",ins_t:"اهم نڪتا",
+i_bal:"بيلنس شيٽ متوازن ناهي: اثاثن ۽ (ذميوارين + سرمائي) ۾ {diff} جو فرق آهي. پنهنجيون داخلائون چيڪ ڪريو.",
+i_loss:"موجوده مدي ۾ ڪاروبار کي {ni} جو خالص نقصان ٿيو.",
+i_nm:"خالص مارجن {v} سٺو آهي: آمدنيءَ جي هر يونٽ مان تقريبن {v} نفعي طور بچي ٿو.",
+i_cr_low:"جاري تناسب {v} آهي (1 کان گهٽ): مختصر مدي جون ذميواريون مختصر مدي جي اثاثن کان وڌيڪ آهن، هي رواني جو خطرو آهي.",
+i_cr_good:"جاري تناسب {v} مختصر مدي جي رواني جي سٺي حالت ڏيکاري ٿو.",
+i_lev_hi:"قرض بمقابله سرمايو {v} آهي: ڪمپني قرض تي تمام گهڻو ڀاڙي ٿي.",
+i_lev_lo:"قرض بمقابله سرمايو {v} محتاط قرض وٺڻ جي نشاني آهي.",
+i_icr_low:"سود ادا ڪرڻ جي سگهه صرف {v} آهي: آپريٽنگ نفعو مشڪل سان سود پورو ڪري ٿو.",
+i_icr_good:"سود ادا ڪرڻ جي سگهه {v} آهي، يعني سود آساني سان ادا ٿي وڃي ٿو.",
+i_rev_up:"گذريل مدي جي مقابلي ۾ آمدني {v} وڌي.",
+i_rev_dn:"گذريل مدي جي مقابلي ۾ آمدني {v} گهٽجي.",
+i_nm_up:"خالص مارجن {a} کان بهتر ٿي {b} ٿيو.",
+i_nm_dn:"خالص مارجن {a} کان گهٽجي {b} رهجي ويو.",
+i_dso:"گراهڪ تقريبن {v} ڏينهن ۾ ادائيگي ڪن ٿا. وصولي سست آهي ۽ نقد ڦاسي پوي ٿو.",
+i_ccc:"نقد گردش جو عرصو {v} ڏينهن آهي، يعني نقد گهڻي وقت تائين ڪاروبار ۾ ڦاٿل رهي ٿو.",
+i_roe_lev:"{roe} جو ROE قرض جي مدد سان وڌيو آهي (ايڪويٽي ملٽي پلائر {em})؛ قرض جي خطري جو جائزو وٺو.",
+i_eq_neg:"حصيدارن جو سرمايو منفي آهي، يعني ذميواريون اثاثن کان وڌيڪ آهن."
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+'use strict';
+const I=window.I18N;
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LANGS={en:{n:'English',dir:'ltr'},ur:{n:'اردو',dir:'rtl'},sd:{n:'سنڌي',dir:'rtl'}};
+const CURS={PKR:{sym:'Rs',loc:'en-IN'},USD:{sym:'$',loc:'en-US'},EUR:{sym:'€',loc:'en-US'},GBP:{sym:'£',loc:'en-US'},AED:{sym:'AED',loc:'en-US'},SAR:{sym:'SAR',loc:'en-US'},CNY:{sym:'¥',loc:'en-US'},INR:{sym:'₹',loc:'en-IN'}};
+const DEF_RATES={USD:1,PKR:280,EUR:0.92,GBP:0.78,AED:3.6725,SAR:3.75,CNY:7.2,INR:84};
+const state={lang:'en',cur:'PKR',rates:Object.assign({},DEF_RATES),tab:'docs',dtype:'cv',doc:null,fin:{cur:{},prev:{}}};
+const LS_KEY='tajzia.v1';
+
+function loadPrefs(){try{const o=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  if(o.lang&&LANGS[o.lang])state.lang=o.lang;
+  if(o.cur&&CURS[o.cur])state.cur=o.cur;
+  if(o.rates)for(const k in o.rates){const v=Number(o.rates[k]);if(CURS[k]&&v>0)state.rates[k]=v;}
+}catch(e){}}
+function savePrefs(){try{localStorage.setItem(LS_KEY,JSON.stringify({lang:state.lang,cur:state.cur,rates:state.rates}));}catch(e){}}
+
+function t(k,p,raw){
+  let s=I[state.lang]&&I[state.lang][k];
+  if(s==null)s=I.en[k];
+  if(s==null)s=k;
+  if(p)s=s.replace(/\{(\w+)\}/g,(m,n)=>{
+    if(!(n in p))return m;
+    let v=p[n];
+    if(Array.isArray(v))v=v.map(x=>typeof x==='string'&&x[0]==='@'?t(x.slice(1),null,true):x).join(state.lang==='en'?', ':'، ');
+    v=String(v);
+    return raw?v:esc(v);
+  });
+  return s;
+}
+const iso=s=>'\u2066'+s+'\u2069';
+const loc=()=>CURS[state.cur].loc;
+function fmtN(x,d){
+  if(x==null||!isFinite(x))return '—';
+  d=d==null?2:d;const f=Math.pow(10,d);let r=Math.round(x*f)/f;if(r===0)r=0;
+  return new Intl.NumberFormat(loc(),{maximumFractionDigits:d,minimumFractionDigits:0}).format(r);
+}
+const N=h=>'<span class="num">'+h+'</span>';
+function moneyS(c){
+  if(c==null||!isFinite(c))return '—';
+  const v=c*state.rates[state.cur];const d=Math.abs(v)>=1000?0:2;const s=fmtN(Math.abs(v),d);
+  return (v<0&&s!=='0'?'-':'')+CURS[state.cur].sym+'\u00A0'+s;
+}
+const money=c=>N(moneyS(c));
+const pctS=(x,d)=>x==null||!isFinite(x)?'—':fmtN(x*100,d==null?1:d)+'%';
+const pct=(x,d)=>N(pctS(x,d));
+
+/* ---------------- sample texts (fictional) ---------------- */
+const SAMPLES={
+cv:`AYESHA KHAN
+Islamabad, Pakistan | ayesha.khan@example.com | +92 300 1234567 | linkedin.com/in/ayeshakhan
+
+PROFESSIONAL SUMMARY
+Operations analyst with 4 years of experience improving supply-chain processes in retail and e-commerce. Skilled in Excel, SQL and Power BI.
+
+EXPERIENCE
+Operations Analyst, ABC Traders, Karachi (Jan 2022 - Present)
+- Reduced order-processing time by 32% by redesigning the warehouse workflow.
+- Led a team of 6 pickers and packers, improving on-time delivery from 84% to 96%.
+- Built a Power BI dashboard used by 15 managers to track weekly sales and stock.
+- Responsible for preparing monthly reports.
+
+Junior Analyst, XYZ Retail, Lahore (Jun 2020 - Dec 2021)
+- Analyzed sales data for 40+ stores and identified savings of Rs 2.4 million.
+- Coordinated with 12 suppliers to cut delivery delays by 20%.
+
+EDUCATION
+BBA (Operations Management), University of Karachi, 2016 - 2020
+
+SKILLS
+Excel, SQL, Power BI, Inventory Planning, Forecasting, Communication
+
+LANGUAGES
+English, Urdu, Sindhi`,
+asg:`The Impact of Social Media on University Students' Academic Performance
+
+Introduction
+Social media has become part of daily life for most university students. This essay examines how platforms such as Instagram, YouTube and WhatsApp affect students' study habits and grades. It argues that the effect depends more on how students use these platforms than on how long they use them.
+
+Body
+Previous research offers mixed evidence. Rahman (2019) found that time spent on video platforms was negatively related to overall grade point average, while Ali and Baig (2021) reported similar results among heavy users. However, Khan et al. (2022) showed that educational use of social media can improve collaboration and motivation. For example, many students form WhatsApp groups to share lecture notes and clarify deadlines.
+
+Another important factor is distraction. Notifications interrupt concentration, and it has been shown that a student needs several minutes to regain focus after each interruption. Therefore, students who study with their phones nearby often take longer to finish the same task. Moreover, sleep is affected because late-night scrolling reduces rest before exams.
+
+On the other hand, social media is really a very useful tool for finding free learning resources. Students can watch tutorials, join academic communities and follow experts. In addition, universities use these platforms to share announcements quickly.
+
+Conclusion
+In conclusion, social media is neither entirely harmful nor entirely helpful. Students who plan their usage, silence notifications during study time and use platforms for learning are likely to benefit. Universities should teach digital study skills to help students find this balance.
+
+References
+Ali, S., & Baig, M. (2021). Screen time and grades in Pakistani universities. Journal of Sample Studies, 9(2), 22-35.
+Khan, A., et al. (2022). Educational uses of messaging apps. Journal of Sample Studies, 11(1), 5-19.
+Rahman, T. (2019). Video platforms and student performance. Journal of Sample Studies, 7(3), 40-58.`,
+rep:`Mobile Payment Adoption Among Small Retailers in Karachi
+
+Abstract
+This study investigates the factors that influence the adoption of mobile payment services among small retailers in Karachi. A survey of 120 shop owners was analyzed using multiple regression. Perceived usefulness and trust were significant predictors of adoption, while age was not.
+
+Introduction
+Small retailers form a large share of Pakistan's economy, yet many still rely on cash. The purpose of this study is to examine why some retailers adopt mobile payments while others do not. The research questions are: (RQ1) Does perceived usefulness affect adoption? (RQ2) Does trust affect adoption?
+
+Literature Review
+The technology acceptance model explains adoption through perceived usefulness and ease of use (Davis, 1989). Later studies extended it with trust in financial services (Ahmed & Shah, 2020; Malik et al., 2021). However, few studies focus on small retailers in Pakistani cities.
+
+Methodology
+A quantitative survey design was used. The sample consisted of 120 retailers selected through convenience sampling. Data were collected with a questionnaire using a five-point Likert scale, and reliability was checked with Cronbach's alpha (0.84). Participants gave informed consent.
+
+Results
+Regression results show that perceived usefulness (β = 0.42, p < 0.01) and trust (β = 0.31, p < 0.05) significantly predicted adoption, while age was not significant (p = 0.27). The model explained 38% of the variance (R² = 0.38). See Table 1 for details.
+
+Discussion
+The results support earlier work (Ahmed & Shah, 2020). Retailers who trust the provider are more willing to use the service. The findings imply that providers should reduce hidden fees.
+
+Conclusion
+Mobile payment adoption among small retailers is driven mainly by usefulness and trust. A limitation of this study is its small, non-random sample. Future research should include other cities.
+
+References
+Ahmed, S., & Shah, R. (2020). Trust and digital payments in emerging markets. Journal of Sample Studies, 12(2), 45-60.
+Davis, F. (1989). Perceived usefulness, perceived ease of use, and user acceptance of information technology. MIS Quarterly, 13(3), 319-340.
+Malik, T., et al. (2021). Mobile wallets and small business growth. Journal of Sample Studies, 14(1), 10-25.`
+};
+SAMPLES.thesis=SAMPLES.rep;
+
+/* ---------------- text utilities ---------------- */
+const STOP=new Set(('a an the and or but if in on at to of for with by from as is are was were be been being it its this that these those he she they we you not no so than then too very can will would should could may might do does did have has had also into over under about between through during more most such other some any each which who whom whose what when where why how their there here our your my his her them us me one two three first second per among within without while both often many much').split(' '));
+function splitSentences(text){
+  const tt=text.replace(/\b(?:e\.g|i\.e|etc|vs|et al|Dr|Mr|Mrs|Ms|Prof|Fig|No|approx)\./gi,m=>m.replace(/\./g,'∙')).replace(/(\d)\.(\d)/g,'$1∙$2');
+  return tt.split(/(?<=[.!?۔؟])\s+|\n+/).map(s=>s.replace(/∙/g,'.').trim()).filter(s=>/\p{L}/u.test(s));
+}
+function syll(w){w=w.toLowerCase().replace(/[^a-z]/g,'');if(!w)return 0;if(w.length<=3)return 1;w=w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/,'').replace(/^y/,'');const m=w.match(/[aeiouy]{1,2}/g);return m?m.length:1;}
+const mk=src=>new RegExp('^(?:'+src+')(?:\\s*(?:&|and|/|,)\\s*[\\w ]{2,25})?$','i');
+const CVD={
+  sum:mk('(?:professional |career |personal |executive )?(?:summary|profile|objective|statement)|about me|career objective'),
+  exp:mk('(?:work |professional |relevant |employment )?(?:experience|history)|employment|internships?'),
+  edu:mk('education(?: and training)?|academic (?:background|qualifications?)|qualifications?'),
+  skills:mk('(?:technical |key |core |professional |soft )?skills|core competencies|competencies|expertise'),
+  proj:mk('projects?|academic projects?'),cert:mk('certifications?|certificates?|courses|training|licen[sc]es'),
+  lang:mk('languages?'),award:mk('awards?|achievements|honou?rs')
+};
+const RSD={
+  abstract:mk('abstract|executive summary'),
+  intro:mk('introduction|background(?: of the study)?|overview'),
+  lit:mk('literature review|review of (?:the )?literature|related work|theoretical (?:framework|background)|conceptual framework'),
+  method:mk('methodology|methods?|research methodology|research design|materials and methods|data and methodology|methods and materials'),
+  results:mk('results?|findings|results and (?:analysis|discussion)|data analysis|analysis(?: and results)?|findings and (?:analysis|discussion)|empirical results'),
+  disc:mk('discussion|discussion and (?:analysis|implications)|analysis and discussion'),
+  concl:mk('conclusions?|conclusion and (?:recommendations?|future work)|conclusions and recommendations|concluding remarks|summary and conclusions?'),
+  refs:mk('references?|bibliography|works cited|reference list')
+};
+function normHead(l){return l.trim().replace(/^[#*_\s]+/,'').replace(/^chapter\s+\w+\s*[:.\-–—]?\s*/i,'').replace(/^(?:\d+|[ivx]+)(?:\.\d+)*[.):]?\s+/i,'').replace(/[:*_\s]+$/,'').trim();}
+function detect(lines,defs){
+  const marks=[];
+  lines.forEach((l,idx)=>{
+    const s=l.trim();if(!s)return;
+    let head=null,inline='';
+    const cm=s.match(/^[#*_\s]*([A-Za-z][A-Za-z &\/]{2,40}?)\s*[:\-–—]\s+(\S.*)$/);
+    if(cm){const n=normHead(cm[1]);for(const id in defs){if(defs[id].test(n)){head=id;inline=cm[2];break;}}}
+    if(!head){const n=normHead(s);if(n&&n.length<=70)for(const id in defs){if(defs[id].test(n)){head=id;break;}}}
+    if(head)marks.push({id:head,idx,inline});
+  });
+  const out={};
+  marks.forEach((m,i)=>{
+    const end=i+1<marks.length?marks[i+1].idx:lines.length;
+    if(!out[m.id])out[m.id]={idx:m.idx,text:((m.inline?m.inline+'\n':'')+lines.slice(m.idx+1,end).join('\n')).trim()};
+  });
+  return out;
+}
+function countCites(txt){
+  let n=0;
+  (txt.match(/\(([^()]*?)\b(?:19|20)\d{2}[a-z]?\b[^()]*?\)/g)||[]).forEach(m=>{if(/[A-Z][a-z]+/.test(m))n+=m.split(';').length;});
+  n+=(txt.match(/\b[A-Z][A-Za-z'’\-]+(?:\s+et al\.?|\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?\s+\((?:19|20)\d{2}[a-z]?\)/g)||[]).length;
+  n+=(txt.match(/\[\d+(?:\s*[,–\-]\s*\d+)*\]/g)||[]).length;
+  return n;
+}
+function refInfo(txt){
+  if(!txt)return{n:0,years:[]};
+  const ls=txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  const yr=/\b(19[5-9]\d|20[0-2]\d)\b/;
+  const withYear=ls.filter(l=>yr.test(l));
+  const apa=(txt.match(/\((?:19|20)\d{2}[a-z]?\)/g)||[]).length;
+  const numbered=(txt.match(/^\s*\[?\d{1,3}[\].)]\s+\S/gm)||[]).length;
+  return{n:Math.max(withYear.length,apa,numbered),years:withYear.map(l=>+l.match(yr)[1])};
+}
+const VERBS=/\b(?:achieved|analy[sz]ed|assisted|automated|boosted|built|coached|collaborated|conducted|configured|coordinated|created|cut|decreased|delivered|deployed|designed|developed|directed|drafted|drove|engineered|established|evaluated|executed|expanded|facilitated|forecasted|formulated|founded|generated|grew|handled|identified|implemented|improved|increased|initiated|integrated|introduced|investigated|launched|led|leveraged|maintained|managed|mentored|migrated|monitored|negotiated|optimi[sz]ed|organi[sz]ed|oversaw|planned|prepared|presented|processed|produced|programmed|published|raised|recruited|redesigned|reduced|researched|resolved|reviewed|revamped|saved|scaled|secured|simplified|sold|spearheaded|streamlined|strengthened|supervised|supported|taught|tested|tracked|trained|transformed|updated|won|wrote)\b/gi;
+const CLICH=['hard-working','hardworking','hard working','team player','self-motivated','self motivated','detail-oriented','detail oriented','results-driven','results driven','responsible for','go-getter','think outside the box','excellent communication skills','dynamic','passionate','synergy','fast learner','quick learner','motivated individual','strong work ethic','proven track record'];
+const METH=[/\bsampl(?:e|ing)\b/i,/\bparticipants?\b|\brespondents?\b/i,/\bsurvey|questionnaire/i,/\binterview/i,/\bdata collection\b|\bcollected\b/i,/\bexperiment/i,/\bqualitative|quantitative|mixed[- ]methods?/i,/\bcase study\b/i,/\bthematic|content analysis|regression|anova|t-test/i,/\bconsent|ethic/i,/\breliab|validity|cronbach/i,/\bpopulation\b/i,/\bdataset|data set/i];
+const STAT=[/\bp\s*[<=>]\s*0?\.\d+/i,/\bn\s*=\s*\d+/i,/\bmean\b|\baverage\b/i,/\bstandard deviation\b|\bSD\b/,/\bcorrelat/i,/\bregression\b/i,/\bsignifican/i,/chi-?square|χ/i,/\banova\b|\bt-test\b/i,/confidence interval|\bCI\b/,/R²|\bR2\s*=|β|\bbeta\s*=/i,/\d+(?:\.\d+)?\s?%/,/\btable\s+\d+|\bfigure\s+\d+|\bfig\.\s*\d+/i];
+const PASS=/\b(?:am|is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?(?:\w{3,}ed|built|made|done|given|shown|seen|known|taken|written|found|held|kept|led|sent|paid|sold|told|brought|thought|chosen|driven|begun|broken|grown|drawn|worn)\b/i;
+
+function analyze(text,type,opt){
+  const raw=text.replace(/\r\n?/g,'\n').replace(/\u00A0/g,' ').trim();
+  const lines=raw.split('\n');
+  const wordsArr=raw.match(/[\p{L}\p{N}][\p{L}\p{N}'’\-]*/gu)||[];
+  const W=wordsArr.length;
+  const lower=wordsArr.map(w=>w.toLowerCase());
+  const prose=splitSentences(raw).filter(s=>s.split(/\s+/).length>=4);
+  const S=Math.max(prose.length,1);
+  const avg=prose.length?prose.reduce((a,s)=>a+s.split(/\s+/).length,0)/prose.length:0;
+  const letters=(raw.match(/\p{L}/gu)||[]).length,latin=(raw.match(/[A-Za-z]/g)||[]).length;
+  const isEn=letters>0&&latin/letters>0.7;
+  let syl=0,lw=0;
+  if(isEn)wordsArr.forEach(w=>{if(/^[A-Za-z'’\-]+$/.test(w)){syl+=syll(w);lw++;}});
+  const ease=isEn&&prose.length&&lw?206.835-1.015*(lw/S)-84.6*(syl/lw):null;
+  const isCV=type==='cv',isAsg=type==='asg',isRes=type==='rep'||type==='thesis';
+  const secs=detect(lines,isCV?CVD:RSD);
+  let paras=raw.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
+  if(paras.length<=1){const ls=lines.map(l=>l.trim()).filter(l=>l.split(/\s+/).length>=25);if(ls.length>1)paras=ls;}
+  const bodyParas=paras.filter(p=>p.split(/\s+/).length>=15);
+  const C=[];
+  const add=(cat,id,status,val,p,w)=>C.push({cat,id,status,val,p:p||{},w:w||1});
+  const hi=(v,g,w)=>v>=g?'pass':v>=w?'warn':'fail';
+  const lo=(v,g,w)=>v<=g?'pass':v<=w?'warn':'fail';
+
+  /* length */
+  const RNG={cv:[250,800],asg:[500,3000],rep:[2000,12000],thesis:[8000,100000]};
+  let mn=RNG[type][0],mx=RNG[type][1],ls;
+  if(!isCV&&opt.target>0){mn=Math.round(opt.target*0.9);mx=Math.round(opt.target*1.1);ls=W>=mn&&W<=mx?'pass':(W>=opt.target*0.8&&W<=opt.target*1.2)?'warn':'fail';}
+  else ls=W>=mn&&W<=mx?'pass':(W>=mn*0.7&&W<=mx*1.3)?'warn':'fail';
+  add('content','length',ls,W,{words:W,min:mn,max:mx},2);
+
+  /* shared language checks */
+  if(!isCV&&isEn&&W>=100){
+    add('language','sentlen',avg>=14&&avg<=24?'pass':(avg>=10&&avg<=30)?'warn':'fail',avg.toFixed(1),{avg:avg.toFixed(1)});
+    const nl=prose.filter(s=>s.split(/\s+/).length>40).length;
+    add('language','longsent',lo(nl,0,2),nl,{n:nl});
+    const eg=type==='thesis'?20:type==='rep'?25:40;
+    add('language','ease',ease>=eg?'pass':ease>=eg-15?'warn':'fail',Math.round(ease),{score:Math.round(ease)});
+    const np=prose.filter(s=>PASS.test(s)).length,pp=Math.round(np/S*100),pl=isRes?30:20;
+    add('language','passive',lo(pp,pl,pl+15),pp+'%',{pct:pp});
+  }
+  if(isEn){
+    const wm=raw.match(/\b(?:very|really|just|quite|basically|actually|literally|stuff|things?|lots|somewhat|nice|pretty much|kind of|sort of|a lot)\b/gi)||[];
+    const rate=W?wm.length*1000/W:0;
+    const uniq=[...new Set(wm.map(x=>x.toLowerCase()))].slice(0,4);
+    add('language','weak',lo(rate,6,12),wm.length,{n:wm.length,list:uniq.join(', ')});
+  }
+  const hy=(raw.match(/\S {2,}\S/g)||[]).length+(raw.match(/[!?]{2,}|\.{4,}/g)||[]).length+(raw.match(/(^|[\s(])i(?=\s+(?:am|was|have|had|will|would|think|believe|can|do|did)\b)/g)||[]).length+(raw.match(/\bi'(?:m|ve|ll|d)\b/g)||[]).length;
+  add('language','hygiene',lo(hy,1,4),hy,{n:hy});
+  if(!isCV&&W>=150){
+    const n=bodyParas.length,pa=n?W/n:W,need=isRes?5:3;
+    add('structure','paras',n>=need&&pa<=250?'pass':n>=2?'warn':'fail',n,{n,avg:Math.round(pa)});
+    if(isEn){
+      const tr=(raw.match(/\b(?:however|therefore|moreover|furthermore|in addition|additionally|for example|for instance|consequently|as a result|on the other hand|in contrast|similarly|thus|hence|nevertheless|nonetheless|in conclusion|firstly|secondly|thirdly|finally|meanwhile|although|whereas|because|besides|likewise|in particular|specifically|subsequently)\b/gi)||[]).length;
+      const tr1k=Math.round(tr*1000/W*10)/10;
+      add('language','trans',hi(tr1k,6,3),tr,{n:tr1k});
+      const co=(raw.match(/\b(?:\w+n['’]t|\w+['’](?:re|ve|ll|m|d)|(?:it|that|there|he|she|what|let|here|who)['’]s)\b/gi)||[]).length;
+      add('language','contr',lo(co,1,4),co,{n:co});
+    }
+  }
+
+  /* CV */
+  if(isCV){
+    const hasE=/[\w.+-]+@[\w-]+\.[\w.-]+/.test(raw);
+    const hasP=/\+?\d[\d\s().-]{7,}\d/.test(raw)&&((raw.match(/\d/g)||[]).length>=9);
+    const missing=[];if(!hasE)missing.push('@m_email');if(!hasP)missing.push('@m_phone');
+    add('structure','contact',missing.length===0?'pass':missing.length===1?'warn':'fail',hasE&&hasP?'✓':'',{missing},2);
+    const req=['exp','edu','skills'],ms=req.filter(x=>!secs[x]).map(x=>'@s_'+x);
+    add('structure','sections',ms.length===0?'pass':ms.length===1?'warn':'fail',(3-ms.length)+'/3',{missing:ms},2);
+    add('content','summary',secs.sum?'pass':'warn','',{});
+    const dates=(raw.match(/\b(?:19|20)\d{2}\b/g)||[]).length;
+    add('structure','dates',hi(dates,4,2),dates,{n:dates});
+    if(isEn){
+      const vn=(raw.match(VERBS)||[]).length;
+      add('evidence','verbs',hi(vn,8,4),vn,{n:vn},1.5);
+      const mm=(raw.match(/\b\d+(?:[.,]\d+)?\s?%|(?:Rs\.?|PKR|USD|\$|€|£|AED|SAR)\s?\d[\d,.]*\s?(?:k|m|million|billion|lakh|crore)?|\b\d+(?:[.,]\d+)?\s?(?:k|m|million|billion|lakh|crore)\b|\b\d{1,4}\+|\b\d+\s+(?:users|customers|clients|students|projects|team members|members|people|employees|stores|suppliers|managers|countries|products|orders|hours|days|weeks|months|pickers)\b/gi)||[]).length;
+      add('evidence','metrics',hi(mm,3,1),mm,{n:mm},2);
+      const low=raw.toLowerCase();const found=CLICH.filter(c=>low.includes(c));
+      add('language','cliches',lo(found.length,0,2),found.length,{list:found.slice(0,4).join(', ')});
+      const pr=(raw.match(/\b(?:I|[Mm]y|[Mm]e|[Mm]yself)\b/g)||[]).length;
+      add('language','pron',lo(pr,2,5),pr,{n:pr});
+    }
+  }
+
+  /* assignment */
+  const refsIdx=secs.refs?secs.refs.idx:-1;
+  const bodyText=refsIdx>=0?lines.slice(0,refsIdx).join('\n'):raw;
+  const nCites=countCites(bodyText);
+  if(isAsg){
+    const first=wordsArr.slice(0,180).join(' ');
+    const hasIntro=/\b(?:this|the)\s+(?:essay|paper|assignment|report|study|article|discussion|analysis)\s+(?:will|aims?|seeks?|examines?|explores?|discusses?|argues?|analy[sz]es?|investigates?|evaluates?|looks|focuses|is)\b|\b(?:aim|purpose|objective|thesis)\s+(?:of|is)\b|\bwill (?:discuss|examine|explore|analy[sz]e|argue|evaluate|show)\b/i.test(first);
+    add('structure','intro',hasIntro?'pass':'warn','',{},1.5);
+    const hasC=!!secs.concl||/\b(?:in conclusion|to conclude|in summary|to sum up|to summari[sz]e|in closing|concluding)\b/i.test(raw.slice(Math.floor(raw.length*0.6)));
+    add('structure','concl',hasC?'pass':'fail','',{},1.5);
+    const need=Math.max(2,Math.round(W/400));
+    add('evidence','cites',nCites>=need?'pass':nCites>=1?'warn':'fail',nCites,{n:nCites},2);
+    add('evidence','refs',secs.refs&&secs.refs.text?'pass':'fail','',{},1.5);
+  }
+
+  /* research report / thesis */
+  if(isRes){
+    const combined=/^\s*[\d.\s]*results?\s*(?:and|&)\s*discussion/im.test(raw);
+    const req=type==='thesis'?['abstract','intro','lit','method','results','disc','concl','refs']:['intro','method','results','concl','refs'];
+    const miss=req.filter(x=>!secs[x]&&!(x==='disc'&&combined)).map(x=>'@s_'+({lit:'lit',method:'method',results:'results',disc:'disc',concl:'concl',refs:'refs',abstract:'abstract',intro:'intro'}[x]));
+    add('structure','rsec',miss.length===0?'pass':miss.length<=2?'warn':'fail',(req.length-miss.length)+'/'+req.length,{missing:miss},2);
+    const an=secs.abstract?(secs.abstract.text.match(/[\p{L}\p{N}][\p{L}\p{N}'’\-]*/gu)||[]).length:0;
+    const amax=type==='thesis'?350:300;
+    add('content','abs',an>=150&&an<=amax?'pass':(an>=100&&an<=amax+100)?'warn':'fail',an,{n:an});
+    add('content','rq',/\b(?:research questions?|hypothes[ie]s|objectives? of (?:this|the) (?:study|research)|aims? of (?:this|the) (?:study|research)|purpose of (?:this|the) (?:study|research)|this (?:study|research|paper|thesis) (?:aims|seeks|examines|investigates)|RQ\s?\d|H\d\b)/i.test(raw)?'pass':'fail','',{},1.5);
+    const mt=secs.method?secs.method.text:raw;
+    const mc=METH.filter(r=>r.test(mt)).length;
+    add('content','meth',hi(mc,4,2),mc,{n:mc},1.5);
+    const st=secs.results?secs.results.text:raw;
+    const sc=STAT.filter(r=>r.test(st)).length;
+    add('evidence','stats',hi(sc,4,2),sc,{n:sc},1.5);
+    const cd=W?Math.round(nCites*1000/W*10)/10:0;
+    add('evidence','cdens',hi(cd,4,2),cd,{n:cd},1.5);
+    const ri=refInfo(secs.refs?secs.refs.text:'');
+    const minR=type==='thesis'?30:10;
+    add('evidence','rcount',ri.n>=minR?'pass':ri.n>=minR/2?'warn':'fail',ri.n,{n:ri.n,min:minR},1.5);
+    if(ri.years.length>=5){
+      const cy=new Date().getFullYear(),rec=ri.years.filter(y=>y>=cy-10).length/ri.years.length,rp=Math.round(rec*100);
+      add('evidence','recent',hi(rec,0.4,0.2),rp+'%',{pct:rp});
+    }
+    add('content','limits',/\b(?:limitations?|delimitations?|future (?:research|studies|work)|recommendations?)\b/i.test(raw)?'pass':'warn','',{});
+  }
+
+  /* keyword coverage */
+  if(opt.kws.length){
+    const low=raw.toLowerCase();
+    const missing=opt.kws.filter(k=>!low.includes(k.toLowerCase()));
+    const cov=Math.round((opt.kws.length-missing.length)/opt.kws.length*100);
+    add('content','kw',hi(cov,80,50),cov+'%',{pct:cov,missing:missing.slice(0,8).join(', ')||'-'},isCV?2:1.5);
+  }
+
+  /* scoring */
+  const SC={pass:1,warn:.5,fail:0};
+  const cats={};
+  ['structure','content','language','evidence'].forEach(c=>{
+    const cs=C.filter(x=>x.cat===c),sw=cs.reduce((a,x)=>a+x.w,0);
+    cats[c]=sw?Math.round(cs.reduce((a,x)=>a+SC[x.status]*x.w,0)/sw*100):null;
+  });
+  const tw=C.reduce((a,x)=>a+x.w,0);
+  const score=tw?Math.round(C.reduce((a,x)=>a+SC[x.status]*x.w,0)/tw*100):0;
+  const freq={};
+  lower.forEach(w=>{if(w.length>=4&&!STOP.has(w)&&!/^\d+$/.test(w))freq[w]=(freq[w]||0)+1;});
+  const top=Object.entries(freq).filter(e=>e[1]>=2||W<200).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const clip=s=>s.length>200?s.slice(0,197)+'…':s;
+  return{type,score,cats,checks:C,top,
+    stats:{W,S:prose.length,P:bodyParas.length||paras.length,avg,ease,uniq:W?new Set(lower).size/W:0,mins:Math.max(1,Math.round(W/200))},
+    flag:{long:prose.filter(s=>s.split(/\s+/).length>40).slice(0,5).map(clip),passive:isEn&&!isCV?prose.filter(s=>PASS.test(s)).slice(0,5).map(clip):[]},
+    short:W<120};
+}
+
+/* ---------------- document result rendering ---------------- */
+function gauge(score,cls){
+  return '<div class="gauge"><div class="gnum" aria-label="'+score+'/100">'+score+'<small>/100</small></div>'
+   +'<div class="ruler" style="--v:'+score+'%"><i class="fill '+cls+'"></i><b class="mark"></b></div>'
+   +'<div class="gticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div>';
+}
+const ORDER={fail:0,warn:1,pass:2};
+function renderDoc(){
+  const box=$('#docResult');const r=state.doc;
+  if(!r){box.innerHTML='';return;}
+  const cls=r.score>=70?'good':r.score>=50?'warn':'bad';
+  const gk=r.score>=85?'g_excellent':r.score>=70?'g_good':r.score>=50?'g_fair':'g_work';
+  const CO=['structure','content','language','evidence'].filter(c=>r.cats[c]!=null);
+  const typeKey={cv:'type_cv',asg:'type_asg',rep:'type_rep',thesis:'type_thesis'}[r.type];
+  const catsH=CO.map(c=>{const v=r.cats[c],k=v>=70?'good':v>=50?'warn':'bad';
+    return '<div class="cat"><div class="cat-h"><span>'+t('cat_'+c)+'</span><b class="num">'+v+'</b></div><div class="bar"><i class="'+k+'" style="width:'+v+'%"></i></div></div>';}).join('');
+  const fix=r.checks.filter(x=>x.status!=='pass').sort((a,b)=>ORDER[a.status]-ORDER[b.status]||b.w-a.w).slice(0,3);
+  const fixH=fix.length?'<div class="fixfirst"><h3>'+t('res_fix')+'</h3><ul>'+fix.map(x=>'<li><b>'+t('k_'+x.id)+':</b> '+t('f_'+x.id,x.p)+'</li>').join('')+'</ul></div>':'';
+  const st=r.stats,nf=new Intl.NumberFormat('en-US');
+  const sts=[['s_words',nf.format(st.W)],['s_sent',nf.format(st.S)],['s_para',nf.format(st.P)],['s_avg',st.avg?st.avg.toFixed(1):'—'],['s_ease',st.ease==null?t('na'):Math.round(st.ease)],['s_uniq',Math.round(st.uniq*100)+'%'],['s_time',st.mins+' '+t('min')]];
+  const statsH='<div class="stats">'+sts.map(s=>'<div class="stat"><span>'+t(s[0])+'</span><b class="num">'+s[1]+'</b></div>').join('')+'</div>';
+  const IC={pass:'✓',warn:'!',fail:'✕'},LB={pass:'st_pass',warn:'st_warn',fail:'st_fail'};
+  const groups=CO.map(c=>{
+    const cs=r.checks.filter(x=>x.cat===c).sort((a,b)=>ORDER[a.status]-ORDER[b.status]);
+    return '<h4>'+t('cat_'+c)+'</h4><ul class="checks">'+cs.map(ck=>'<li class="ck '+ck.status+'"><span class="ic" role="img" aria-label="'+t(LB[ck.status])+'">'+IC[ck.status]+'</span><div><div class="ck-t"><b>'+t('k_'+ck.id)+'</b>'+(ck.val!==''&&ck.val!=null?'<span class="val num">'+esc(ck.val)+'</span>':'')+'</div>'+(ck.status!=='pass'?'<p>'+t('f_'+ck.id,ck.p)+'</p>':'')+'</div></li>').join('')+'</ul>';
+  }).join('');
+  const kwH=r.top.length?'<div class="sheet"><h3>'+t('res_kw')+'</h3><div class="kw">'+r.top.map(k=>'<span>'+esc(k[0])+'<b class="num">'+k[1]+'</b></span>').join('')+'</div></div>':'';
+  const fl=(title,arr)=>arr.length?'<h4>'+title+'</h4><ul class="flag">'+arr.map(s=>'<li><mark>'+esc(s)+'</mark></li>').join('')+'</ul>':'';
+  const flH=fl(t('flag_long'),r.flag.long)+fl(t('flag_passive'),r.flag.passive);
+  box.innerHTML='<div class="sheet"><div class="rtop"><div><h2>'+t('res_overall')+'</h2>'+gauge(r.score,cls)+'<div class="grade">'+t(gk)+'<span>'+t(typeKey)+'</span></div></div><div>'+catsH+'</div></div>'+fixH+'</div>'
+   +(r.short?'<p class="msg">'+t('err_short')+'</p>':'')
+   +statsH
+   +'<div class="sheet"><h3>'+t('res_checks')+'</h3>'+groups+'</div>'
+   +kwH
+   +'<details class="sheet"><summary>'+t('res_flag')+'</summary>'+(flH||'<p class="hint">'+t('flag_none')+'</p>')+'</details>'
+   +'<p class="note">'+t('res_note')+'</p><p class="note">'+t('res_disc')+'</p>'
+   +'<div class="row"><button class="btn" type="button" id="btnCopy">'+t('btn_copy')+'</button></div>';
+}
+function docSummary(){
+  const r=state.doc;if(!r)return '';
+  const L=[];
+  L.push(t('app_name',null,true)+' - '+t({cv:'type_cv',asg:'type_asg',rep:'type_rep',thesis:'type_thesis'}[r.type],null,true));
+  L.push(t('res_overall',null,true)+': '+r.score+'/100');
+  ['structure','content','language','evidence'].forEach(c=>{if(r.cats[c]!=null)L.push(t('cat_'+c,null,true)+': '+r.cats[c]);});
+  const bad=r.checks.filter(x=>x.status!=='pass').sort((a,b)=>ORDER[a.status]-ORDER[b.status]||b.w-a.w);
+  if(bad.length){L.push('');L.push(t('res_fix',null,true)+':');bad.forEach(x=>L.push('- '+t('k_'+x.id,null,true)+': '+t('f_'+x.id,x.p,true)));}
+  return L.join('\n');
+}
+window.__T={state,t,esc,iso,fmtN,N,moneyS,money,pctS,pct,gauge,analyze,renderDoc,docSummary,SAMPLES,LANGS,CURS,DEF_RATES,loadPrefs,savePrefs,$,$$};
+})();
+</script>
+<script>
+(function(){
+'use strict';
+const {state,t,esc,iso,fmtN,N,moneyS,money,pctS,pct,gauge,analyze,renderDoc,docSummary,SAMPLES,LANGS,CURS,DEF_RATES,loadPrefs,savePrefs,$,$$}=window.__T;
+
+/* ---------------- finance model ---------------- */
+const IS_ROWS=[['in','rev'],['in','cogs'],['calc','gp'],['in','opex'],['in','da'],['calc','ebit'],['memo','ebitda'],['in','int'],['in','oth'],['calc','ebt'],['in','tax'],['calc','ni']];
+const BS_ROWS=[['head','assets'],['in','cash'],['in','ar'],['in','inv'],['in','oca'],['calc','tca'],['in','ppe'],['in','ona'],['calc','ta'],['head','liab'],['in','ap'],['in','std'],['in','ocl'],['calc','tcl'],['in','ltd'],['in','oncl'],['calc','tl'],['head','eqh'],['in','eq'],['calc','tle'],['calc','diff']];
+const FINAL=new Set(['ni','ta','tle']);
+const SAMPLE_FIN={
+  cur:{rev:12500000,cogs:7800000,opex:2100000,da:300000,int:250000,oth:50000,tax:570000,cash:1400000,ar:1900000,inv:2300000,oca:200000,ppe:6200000,ona:500000,ap:1600000,std:900000,ocl:500000,ltd:3000000,oncl:300000,eq:6200000},
+  prev:{rev:10800000,cogs:6900000,opex:1850000,da:280000,int:260000,oth:30000,tax:430000,cash:1100000,ar:1700000,inv:2100000,oca:150000,ppe:5900000,ona:450000,ap:1450000,std:1000000,ocl:450000,ltd:3300000,oncl:250000,eq:4950000}
+};
+function buildTable(tbl,rows,pfx){
+  let h='<thead><tr><th scope="col"></th><th scope="col" data-i18n="fin_curp"></th><th scope="col" data-i18n="fin_prevp"></th></tr></thead><tbody>';
+  rows.forEach(([ty,id])=>{
+    if(ty==='head'){h+='<tr class="head"><th colspan="3" scope="colgroup" data-i18n="'+pfx+'_'+id+'"></th></tr>';return;}
+    h+='<tr class="r-'+ty+(FINAL.has(id)?' r-final':'')+(id==='diff'?' r-diff':'')+'"><th scope="row" data-i18n="'+pfx+'_'+id+'"></th>';
+    ['cur','prev'].forEach(p=>{
+      h+=ty==='in'?'<td><input class="amt" type="text" inputmode="decimal" autocomplete="off" data-p="'+p+'" data-id="'+id+'" data-pfx="'+pfx+'"></td>':'<td class="calc" data-calc="'+id+'" data-p="'+p+'"></td>';
+    });
+    h+='</tr>';
+  });
+  tbl.innerHTML=h+'</tbody>';
+}
+function parseNum(s){
+  s=String(s).trim();if(!s)return null;
+  s=s.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٬،,\s]/g,'').replace(/٫/g,'.');
+  let neg=false;if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1);}
+  const v=Number(s);if(!isFinite(v)||s==='')return null;
+  return neg?-v:v;
+}
+const rate=()=>state.rates[state.cur];
+const fmtInp=v=>new Intl.NumberFormat(CURS[state.cur].loc,{maximumFractionDigits:2}).format(Math.round(v*100)/100);
+function refreshInputs(){
+  $$('input.amt').forEach(el=>{const c=state.fin[el.dataset.p][el.dataset.id];el.value=c==null?'':fmtInp(c*rate());});
+}
+function labelInputs(){
+  $$('input.amt').forEach(el=>{el.setAttribute('aria-label',t(el.dataset.pfx+'_'+el.dataset.id,null,true)+', '+t(el.dataset.p==='cur'?'fin_curp':'fin_prevp',null,true));});
+}
+function getStm(p){
+  const v=id=>Number(state.fin[p][id])||0;
+  const IS={rev:v('rev'),cogs:v('cogs'),opex:v('opex'),da:v('da'),int:v('int'),oth:v('oth'),tax:v('tax')};
+  IS.gp=IS.rev-IS.cogs;IS.ebit=IS.gp-IS.opex-IS.da;IS.ebitda=IS.ebit+IS.da;IS.ebt=IS.ebit-IS.int+IS.oth;IS.ni=IS.ebt-IS.tax;
+  const B={cash:v('cash'),ar:v('ar'),inv:v('inv'),oca:v('oca'),ppe:v('ppe'),ona:v('ona'),ap:v('ap'),std:v('std'),ocl:v('ocl'),ltd:v('ltd'),oncl:v('oncl'),eq:v('eq')};
+  B.tca=B.cash+B.ar+B.inv+B.oca;B.ta=B.tca+B.ppe+B.ona;B.tcl=B.ap+B.std+B.ocl;B.tl=B.tcl+B.ltd+B.oncl;B.tle=B.tl+B.eq;B.diff=B.ta-B.tle;
+  return{IS,B,has:Object.values(state.fin[p]).some(x=>x!=null&&x!==0)};
+}
+const unbalanced=S=>{const m=Math.max(Math.abs(S.B.ta),Math.abs(S.B.tle));return Math.abs(S.B.diff)>Math.max(1e-9,m*0.005);};
+const div=(a,b)=>(b===0||!isFinite(a/b))?null:a/b;
+function ratios(S,P){
+  const i=S.IS,b=S.B,debt=b.std+b.ltd,r={};
+  r.current=div(b.tca,b.tcl);r.quick=div(b.cash+b.ar,b.tcl);r.cash=div(b.cash,b.tcl);r.wc=b.tca-b.tcl;
+  r.gm=div(i.gp,i.rev);r.om=div(i.ebit,i.rev);r.ebitdam=div(i.ebitda,i.rev);r.nm=div(i.ni,i.rev);r.roa=div(i.ni,b.ta);r.roe=b.eq>0?div(i.ni,b.eq):null;
+  r.de=b.eq>0?div(debt,b.eq):null;r.dr=div(b.tl,b.ta);r.em=b.eq>0?div(b.ta,b.eq):null;r.icr=i.int>0?div(i.ebit,i.int):null;
+  r.at=div(i.rev,b.ta);r.invt=b.inv>0?div(i.cogs,b.inv):null;
+  r.dio=i.cogs>0?365*b.inv/i.cogs:null;r.dso=i.rev>0?365*b.ar/i.rev:null;r.dpo=i.cogs>0?365*b.ap/i.cogs:null;
+  r.ccc=(r.dio!=null&&r.dso!=null&&r.dpo!=null)?r.dio+r.dso-r.dpo:null;
+  r.revg=P&&P.IS.rev!==0?(i.rev-P.IS.rev)/Math.abs(P.IS.rev):null;
+  r.nig=P&&P.IS.ni!==0?(i.ni-P.IS.ni)/Math.abs(P.IS.ni):null;
+  return r;
+}
+const RD=[
+{g:'liq',id:'current',f:'x',d:'hi',good:1.5,ok:1},{g:'liq',id:'quick',f:'x',d:'hi',good:1,ok:.7},{g:'liq',id:'cash',f:'x',d:'hi',good:.5,ok:.2},{g:'liq',id:'wc',f:'m',d:'pos'},
+{g:'prof',id:'gm',f:'p',d:'hi',good:.3,ok:.15},{g:'prof',id:'om',f:'p',d:'hi',good:.15,ok:.05},{g:'prof',id:'ebitdam',f:'p',d:'hi',good:.2,ok:.1},{g:'prof',id:'nm',f:'p',d:'hi',good:.1,ok:.03},{g:'prof',id:'roa',f:'p',d:'hi',good:.05,ok:.02},{g:'prof',id:'roe',f:'p',d:'hi',good:.15,ok:.08},
+{g:'lev',id:'de',f:'x',d:'lo',good:1,ok:2},{g:'lev',id:'dr',f:'p',d:'lo',good:.5,ok:.7},{g:'lev',id:'em',f:'x',d:'lo',good:2.5,ok:4},{g:'lev',id:'icr',f:'x',d:'hi',good:4,ok:1.5},
+{g:'eff',id:'at',f:'x',d:'hi',good:1,ok:.5},{g:'eff',id:'invt',f:'x',d:'hi',good:6,ok:3},{g:'eff',id:'dio',f:'d',d:'lo',good:60,ok:120},{g:'eff',id:'dso',f:'d',d:'lo',good:45,ok:90},{g:'eff',id:'dpo',f:'d',d:'n'},{g:'eff',id:'ccc',f:'d',d:'lo',good:60,ok:120},
+{g:'gro',id:'revg',f:'p',d:'hi',good:.1,ok:0},{g:'gro',id:'nig',f:'p',d:'hi',good:.1,ok:0}
+];
+const GW={liq:.2,prof:.3,lev:.25,eff:.15,gro:.1},SCV={good:100,fair:60,weak:20};
+const ICON={good:'✓',fair:'!',weak:'✕'},SL={good:'h_strong',fair:'h_fair',weak:'h_weak'};
+function status(d,v){
+  if(v==null||!isFinite(v)||d.d==='n')return null;
+  if(d.d==='pos')return v>0?'good':'weak';
+  if(d.d==='hi')return v>=d.good?'good':v>=d.ok?'fair':'weak';
+  return v<=d.good?'good':v<=d.ok?'fair':'weak';
+}
+function fmtRp(d,v){
+  if(v==null||!isFinite(v))return '—';
+  if(d.f==='x')return fmtN(v,2)+'×';
+  if(d.f==='p')return fmtN(v*100,1)+'%';
+  if(d.f==='d')return fmtN(v,0)+'\u00A0'+t('u_days',null,true);
+  return moneyS(v);
+}
+function rcard(d,v,s,pv){
+  const meta=[];
+  if(d.d==='pos')meta.push(t('bench')+': '+N('&gt; 0'));
+  else if(d.d!=='n')meta.push(t('bench')+': '+N(esc((d.d==='hi'?'≥ ':'≤ ')+fmtRp(d,d.good))));
+  if(pv!=null&&d.g!=='gro')meta.push(t('prev')+': '+N(esc(fmtRp(d,pv))));
+  return '<div class="rcard '+(s||'')+'"><div class="rname">'+t('r_'+d.id)+'</div><div class="rval">'+N(esc(fmtRp(d,v)))+(s?'<span class="badge '+s+'"><span aria-hidden="true">'+ICON[s]+'</span>'+t(SL[s])+'</span>':'')+'</div><div class="rmeta">'+meta.map(m=>'<span>'+m+'</span>').join('')+'</div></div>';
+}
+function insights(cs,ps,r,r0){
+  const L=[],B=cs.B,I=cs.IS,x2=v=>iso(fmtN(v,2)+'×');
+  const m=Math.max(Math.abs(B.ta),Math.abs(B.tle));
+  if(m>0&&Math.abs(B.diff)>m*0.005)L.push(['risk','i_bal',{diff:iso(moneyS(Math.abs(B.diff)))}]);
+  if(I.ni<0)L.push(['risk','i_loss',{ni:iso(moneyS(Math.abs(I.ni)))}]);
+  else if(r.nm!=null&&r.nm>=.1)L.push(['good','i_nm',{v:iso(pctS(r.nm))}]);
+  if(r.current!=null){if(r.current<1)L.push(['risk','i_cr_low',{v:x2(r.current)}]);else if(r.current>=1.5)L.push(['good','i_cr_good',{v:x2(r.current)}]);}
+  if(B.eq<0)L.push(['risk','i_eq_neg',{}]);
+  else if(r.de!=null){if(r.de>2)L.push(['risk','i_lev_hi',{v:x2(r.de)}]);else if(r.de<=1)L.push(['good','i_lev_lo',{v:x2(r.de)}]);}
+  if(r.icr!=null){if(r.icr<1.5)L.push(['risk','i_icr_low',{v:x2(r.icr)}]);else if(r.icr>=4)L.push(['good','i_icr_good',{v:x2(r.icr)}]);}
+  if(ps.has){
+    if(r.revg!=null){if(r.revg>=0)L.push(['good','i_rev_up',{v:iso(pctS(r.revg))}]);else L.push(['risk','i_rev_dn',{v:iso(pctS(Math.abs(r.revg)))}]);}
+    if(r0&&r.nm!=null&&r0.nm!=null&&Math.abs(r.nm-r0.nm)>=.02)L.push([r.nm>r0.nm?'good':'risk',r.nm>r0.nm?'i_nm_up':'i_nm_dn',{a:iso(pctS(r0.nm)),b:iso(pctS(r.nm))}]);
+  }
+  if(r.dso!=null&&r.dso>90)L.push(['risk','i_dso',{v:iso(fmtN(r.dso,0))}]);
+  if(r.ccc!=null&&r.ccc>120)L.push(['risk','i_ccc',{v:iso(fmtN(r.ccc,0))}]);
+  if(r.roe!=null&&r.roe>=.15&&r.em!=null&&r.em>3)L.push(['info','i_roe_lev',{roe:iso(pctS(r.roe)),em:x2(r.em)}]);
+  return L;
+}
+function hv(ids,pfx,grp,base,baseLbl,cs,ps){
+  const rows=ids.map(id=>{
+    const c=cs[grp][id],p=ps[grp][id],chg=ps.has&&p!==0?(c-p)/Math.abs(p):null,bs=cs[grp][base],share=bs?c/bs:null;
+    return '<tr><th scope="row">'+t(pfx+'_'+id)+'</th><td>'+money(c)+'</td><td>'+(ps.has?money(p):'')+'</td><td>'+(chg==null?'':pct(chg))+'</td><td>'+(share==null?'':pct(share))+'</td></tr>';
+  }).join('');
+  return '<div class="tbl"><table class="hv"><thead><tr><th>'+t('c_item')+'</th><th>'+t('fin_curp')+'</th><th>'+t('fin_prevp')+'</th><th>'+t('c_chg')+'</th><th>'+t(baseLbl)+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+function updateCalc(cs,ps){
+  $$('td[data-calc]').forEach(td=>{
+    const S=td.dataset.p==='cur'?cs:ps,id=td.dataset.calc,val=(id in S.IS)?S.IS[id]:S.B[id];
+    td.innerHTML=S.has?money(val):'';
+  });
+  const dr=$('tr.r-diff');if(dr)dr.classList.toggle('bad',cs.has&&unbalanced(cs));
+  const bb=$('#balBadge');
+  if(!cs.has){bb.textContent='';bb.className='bal';}
+  else if(unbalanced(cs)){bb.textContent='✕ '+t('bs_bad',null,true);bb.className='bal bad';}
+  else{bb.textContent='✓ '+t('bs_ok',null,true);bb.className='bal ok';}
+}
+function renderFin(){
+  const cs=getStm('cur'),ps=getStm('prev');
+  updateCalc(cs,ps);
+  const box=$('#finResult');
+  if(!cs.has){box.innerHTML='<div class="sheet empty">'+t('fin_empty')+'</div>';return;}
+  const r=ratios(cs,ps.has?ps:null),r0=ps.has?ratios(ps,null):null;
+  let sum=0,wsum=0;const gh=[];
+  ['liq','prof','lev','eff','gro'].filter(g=>g!=='gro'||ps.has).forEach(g=>{
+    const sc=[];let cards='';
+    RD.filter(d=>d.g===g).forEach(d=>{
+      const v=r[d.id],s=status(d,v);
+      if(s)sc.push(SCV[s]);
+      if(g==='gro'&&v==null)return;
+      cards+=rcard(d,v,s,r0?r0[d.id]:null);
+    });
+    const gs=sc.length?sc.reduce((a,b)=>a+b,0)/sc.length:null;
+    if(gs!=null){sum+=GW[g]*gs;wsum+=GW[g];}
+    if(cards)gh.push('<div class="rgroup"><h4><span>'+t('rc_'+g)+'</span></h4><div class="rgrid">'+cards+'</div></div>');
+  });
+  const score=wsum?Math.round(sum/wsum):null;
+  const cls=score>=75?'good':score>=55?'warn':'bad',hk=score>=75?'h_strong':score>=55?'h_fair':'h_weak';
+  const ins=insights(cs,ps,r,r0);
+  const icons={good:'✓',risk:'!',info:'i'};
+  const insH=ins.length?'<ul class="ins">'+ins.map(x=>'<li class="'+x[0]+'"><span class="ic" aria-hidden="true">'+icons[x[0]]+'</span><div>'+t(x[1],x[2])+'</div></li>').join('')+'</ul>':'';
+  let dup='';
+  if([r.nm,r.at,r.em,r.roe].every(v=>v!=null)){
+    dup='<h3 style="margin-top:22px">'+t('dp_t')+'</h3><div class="dupont"><div><small>'+t('r_nm')+'</small>'+pct(r.nm)+'</div><span>×</span><div><small>'+t('r_at')+'</small>'+N(fmtN(r.at,2)+'×')+'</div><span>×</span><div><small>'+t('r_em')+'</small>'+N(fmtN(r.em,2)+'×')+'</div><span>=</span><div class="eq"><small>'+t('r_roe')+'</small>'+pct(r.roe)+'</div></div><p class="note">'+t('dp_n')+'</p>';
+  }
+  let cost='';
+  if(cs.IS.rev>0){
+    const I=cs.IS,segs=[['cogs',I.cogs],['opex',I.opex],['da',I.da],['int',I.int],['tax',I.tax],['ni',Math.max(I.ni,0)]].filter(s=>s[1]>0);
+    const tot=segs.reduce((a,s)=>a+s[1],0);
+    if(tot>0)cost='<h3 style="margin-top:22px">'+t('cs_t')+'</h3><div class="cbar" role="img" aria-label="'+t('cs_t',null,true)+'">'+segs.map(s=>'<i class="k-'+s[0]+'" style="width:'+(s[1]/tot*100).toFixed(2)+'%"></i>').join('')+'</div><div class="legend">'+segs.map(s=>'<span><em class="k-'+s[0]+'"></em>'+t('is_'+s[0])+' '+pct(s[1]/I.rev)+'</span>').join('')+'</div>';
+  }
+  const hvH='<details class="sheet"><summary>'+t('hv_t')+'</summary><h4>'+t('fin_is')+'</h4>'+hv(['rev','cogs','gp','opex','da','ebit','int','oth','ebt','tax','ni'],'is','IS','rev','c_pr',cs,ps)+'<h4>'+t('fin_bs')+'</h4>'+hv(['cash','ar','inv','tca','ppe','ona','ta','ap','std','tcl','ltd','tl','eq'],'bs','B','ta','c_pa',cs,ps)+'</details>';
+  box.innerHTML='<div class="sheet"><div class="rtop"><div><h2>'+t('fin_score')+'</h2>'+(score!=null?gauge(score,cls)+'<div class="grade">'+t(hk)+'</div>':'')+'</div><div>'+(insH?'<h3>'+t('ins_t')+'</h3>'+insH:'')+'</div></div></div>'
+    +'<div class="sheet"><h2>'+t('fin_res')+'</h2>'+gh.join('')+dup+cost+'</div>'
+    +hvH+'<p class="note">'+t('fin_note')+'</p>';
+}
+
+/* ---------------- statement file upload ---------------- */
+const FIN_RULES=[
+ {id:'cogs',g:'is',r:[/cost of goods sold/,/cost of sales/,/cost of revenue/,/\bcogs\b/]},
+ {id:'da',g:'is',r:[/depreciation.*amorti[sz]ation/,/amorti[sz]ation.*depreciation/,/\bd\s?&\s?a\b/,/\bdepreciation\b/,/\bamorti[sz]ation\b/]},
+ {id:'opex',g:'is',r:[/operating expenses?/,/selling,? general.*administrative/,/\bsg\s?&\s?a\b/,/administrative expenses?/,/operating costs?/]},
+ {id:'int',g:'is',r:[/interest expense/,/finance costs?/,/interest paid/,/\binterest\b/]},
+ {id:'tax',g:'is',r:[/income tax expense/,/tax expense/,/income tax/,/\btaxation\b/]},
+ {id:'oth',g:'is',r:[/other income/,/other expenses?/,/non[\s-]?operating/]},
+ {id:'rev',g:'is',r:[/total revenue/,/net revenue/,/net sales/,/sales revenue/,/^revenue$/,/\brevenue\b/,/\bturnover\b/,/^sales$/,/\bsales\b/]},
+ {id:'cash',g:'bs',r:[/cash and cash equivalents/,/cash\s?&\s?equivalents/,/^cash$/,/\bcash\b/]},
+ {id:'ar',g:'bs',r:[/accounts? receivables?/,/trade receivables?/,/\breceivables?\b/,/\bdebtors\b/]},
+ {id:'inv',g:'bs',r:[/\binventor(?:y|ies)\b/,/\bstock\b/]},
+ {id:'ppe',g:'bs',r:[/property,? plant.*equipment/,/fixed assets?/,/\bppe\b/]},
+ {id:'ap',g:'bs',r:[/accounts? payables?/,/trade payables?/,/\bpayables?\b/,/\bcreditors\b/]},
+ {id:'std',g:'bs',r:[/short[\s-]?term (?:debt|borrowings?|loans?)/,/current portion of long[\s-]?term debt/,/bank overdraft/]},
+ {id:'ltd',g:'bs',r:[/long[\s-]?term (?:debt|borrowings?|loans?)/]},
+ {id:'eq',g:'bs',r:[/total (?:shareholders'?|stockholders'?|owners'?) equity/,/shareholders'? equity/,/stockholders'? equity/,/owners'? equity/,/\bequity\b/]},
+ {id:'oca',g:'bs',r:[/other current assets?/,/prepaid expenses?/]},
+ {id:'ona',g:'bs',r:[/other non[\s-]?current assets?/,/intangible assets?/,/other assets?/]},
+ {id:'ocl',g:'bs',r:[/other current liabilities/,/accrued (?:liabilities|expenses)/]},
+ {id:'oncl',g:'bs',r:[/other non[\s-]?current liabilities/,/deferred tax liabilit/]}
+];
+const FIN_EXCLUDE=[/total assets/,/total current assets/,/total non[\s-]?current assets/,/total liabilities and equity/,/total liabilities/,/total current liabilities/,/total non[\s-]?current liabilities/,/gross profit/,/operating income/,/\bebit\b/,/\bebitda\b/,/net income/,/net profit/,/profit before tax/,/profit after tax/,/earnings before/,/total expenses?/,/working capital/];
+const normLabel=s=>String(s).toLowerCase().replace(/[_]+/g,' ').replace(/[^a-z0-9&%' \-]/g,' ').replace(/\s+/g,' ').trim();
+function matchRule(norm){
+  for(const rule of FIN_RULES){if(rule.r.some(re=>re.test(norm)))return rule;}
+  return null;
+}
+function splitCsv(line){return line.split(',').map(c=>c.replace(/^\s*"|"\s*$/g,'').trim());}
+function cellsToLV(cells){
+  cells=cells.filter(c=>c!=null&&String(c)!=='');
+  if(cells.length<2)return null;
+  const label=String(cells[0]).trim();
+  let val=null;
+  for(let i=cells.length-1;i>=1;i--){const v=(typeof cells[i]==='number')?cells[i]:parseNum(cells[i]);if(v!=null){val=v;break;}}
+  if(!label||val==null)return null;
+  return[label,val];
+}
+function parseLineLV(line){
+  const m=line.trim().match(/^(.*?)[\s,:\t]+([+\-]?\(?\s*\d[\d,.]*\s*\)?%?)\s*$/);
+  if(!m)return null;
+  const label=m[1].replace(/["']/g,'').trim(),val=parseNum(m[2]);
+  return(label&&val!=null)?[label,val]:null;
+}
+function rowsFromText(text,ext){
+  return text.split(/\r?\n/).map(line=>{
+    if(!line.trim())return null;
+    const cells=ext==='csv'?splitCsv(line):line.split(/\t+|\s{2,}/).map(s=>s.trim()).filter(Boolean);
+    return cellsToLV(cells)||parseLineLV(line);
+  }).filter(Boolean);
+}
+function setFinMsg(text,ok){const m=$('#finMsg');m.textContent=text;m.className='msg'+(ok?' info':'');}
+function applyFinRows(rows,period){
+  if(!rows.length){setFinMsg(t('err_fin_empty',null,true));return;}
+  const filled=new Set(),matched=[];let unmatched=0;
+  rows.forEach(([label,val])=>{
+    const norm=normLabel(label);
+    if(!norm||FIN_EXCLUDE.some(re=>re.test(norm)))return;
+    const rule=matchRule(norm);
+    if(rule&&!filled.has(rule.id)){
+      state.fin[period][rule.id]=val;filled.add(rule.id);
+      matched.push(t(rule.g+'_'+rule.id,null,true));
+    }else if(!rule){unmatched++;}
+  });
+  refreshInputs();renderFin();
+  const parts=[];
+  if(matched.length)parts.push(t('fin_matched',{n:matched.length},true)+' '+matched.join(', '));
+  if(unmatched)parts.push(t('fin_unmatched',{n:unmatched},true));
+  setFinMsg(parts.length?parts.join(' — '):t('err_fin_empty',null,true),matched.length>0);
+}
+async function handleFinFile(f){
+  const ext=f.name.split('.').pop().toLowerCase();
+  const period=$('#finPeriodSel').value==='prev'?'prev':'cur';
+  try{
+    let rows;
+    if(ext==='xlsx'){
+      if(!window.XLSX)throw new Error('noxlsx');
+      const buf=await f.arrayBuffer();
+      const wb=window.XLSX.read(buf,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const aoa=window.XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+      rows=aoa.map(r=>cellsToLV(r)).filter(Boolean);
+    }else{
+      rows=rowsFromText(await f.text(),ext==='csv'?'csv':'txt');
+    }
+    applyFinRows(rows,period);
+  }catch(err){
+    setFinMsg(err&&err.message==='noxlsx'?t('err_fin_xlsx',null,true):t('err_fin_file',null,true));
+  }
+}
+window.__T.finUpload={handleFinFile,rowsFromText,matchRule,normLabel,applyFinRows};
+
+/* ---------------- currency ---------------- */
+function curName(code){try{return new Intl.DisplayNames([state.lang],{type:'currency'}).of(code);}catch(e){return code;}}
+function buildCurSel(){
+  $('#curSel').innerHTML=Object.keys(CURS).map(c=>'<option value="'+c+'"'+(c===state.cur?' selected':'')+'>'+c+' ('+esc(CURS[c].sym)+') '+esc(curName(c))+'</option>').join('');
+}
+function updateCurNote(){$('#finCurNote').textContent=t('fin_in',{c:state.cur+' ('+CURS[state.cur].sym+')'},true);}
+function buildRates(){
+  $('#ratesGrid').innerHTML=Object.keys(CURS).filter(c=>c!=='USD').map(c=>'<label class="rate"><span class="num">1 USD =</span><input type="text" inputmode="decimal" data-rate="'+c+'" value="'+state.rates[c]+'"><span class="num">'+c+'</span></label>').join('');
+}
+function setRate(code,v){
+  if(code===state.cur){
+    const f=state.rates[code]/v;
+    ['cur','prev'].forEach(p=>{for(const id in state.fin[p]){if(state.fin[p][id]!=null)state.fin[p][id]*=f;}});
+  }
+  state.rates[code]=v;savePrefs();refreshInputs();renderFin();
+}
+
+/* ---------------- UI wiring ---------------- */
+function buildLangSeg(){
+  const g=$('#langSeg');g.setAttribute('aria-label',t('lang',null,true));
+  g.innerHTML=Object.keys(LANGS).map(k=>'<button type="button" data-lang="'+k+'" lang="'+k+'" aria-pressed="'+(state.lang===k)+'">'+LANGS[k].n+'</button>').join('');
+}
+const TYPES=[['cv','type_cv'],['asg','type_asg'],['rep','type_rep'],['thesis','type_thesis']];
+function buildTypeSeg(){
+  $('#typeSeg').innerHTML=TYPES.map(([id,k])=>'<button type="button" role="radio" aria-checked="'+(state.dtype===id)+'" data-type="'+id+'">'+t(k)+'</button>').join('');
+}
+function syncType(){
+  $('#fTarget').hidden=state.dtype==='cv';
+  const kl=$('#kwLabel');kl.dataset.i18n=state.dtype==='cv'?'doc_kw_cv':'doc_kw';kl.textContent=t(kl.dataset.i18n,null,true);
+}
+function setMsg(key,info){
+  const m=$('#docMsg');m.className='msg'+(info?' info':'');
+  if(key){m.dataset.i18n=key;m.textContent=t(key,null,true);}else{delete m.dataset.i18n;m.textContent='';}
+}
+function setTab(tab){
+  state.tab=tab;
+  $$('.door').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
+  $('#panel-docs').hidden=tab!=='docs';$('#panel-fin').hidden=tab!=='fin';
+}
+function applyLang(){
+  const h=document.documentElement;h.lang=state.lang;h.dir=LANGS[state.lang].dir;
+  document.title=t('app_name',null,true)+': '+t('tab_docs',null,true)+' / '+t('tab_fin',null,true);
+  $$('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n,null,true);});
+  $('#aboutLink').textContent=t('nav_about',null,true);
+  $('#termsLink').textContent=t('nav_terms',null,true);
+  $$('[data-i18n-ph]').forEach(el=>{el.placeholder=t(el.dataset.i18nPh,null,true);});
+  buildLangSeg();buildCurSel();buildTypeSeg();labelInputs();updateCurNote();renderDoc();renderFin();
+}
+function runAnalyze(){
+  const text=$('#docText').value;
+  if(!text.trim()){setMsg('err_empty');state.doc=null;renderDoc();return;}
+  setMsg(null);
+  const kws=$('#kwIn').value.split(/[,;\n،]/).map(s=>s.trim()).filter(Boolean);
+  const target=parseInt($('#targetWords').value,10)||0;
+  state.doc=analyze(text,state.dtype,{kws,target});
+  renderDoc();
+  $('#docResult').scrollIntoView();
+}
+const SAMPLE_KW={cv:'Power BI, SQL, inventory, forecasting, Python',asg:'social media, academic performance, distraction',rep:'adoption, trust, retailers',thesis:'adoption, trust, retailers'};
+function fallbackCopy(s){
+  try{const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok;}catch(e){return false;}
+}
+function copyText(s){
+  return new Promise(res=>{
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(()=>res(true),()=>res(fallbackCopy(s)));return;}}catch(e){}
+    res(fallbackCopy(s));
+  });
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.lang){state.lang=b.dataset.lang;savePrefs();applyLang();return;}
+  if(b.dataset.tab){setTab(b.dataset.tab);return;}
+  if(b.dataset.type){state.dtype=b.dataset.type;buildTypeSeg();syncType();return;}
+  if(b.id==='btnAnalyze'){runAnalyze();return;}
+  if(b.id==='btnSample'){
+    $('#docText').value=SAMPLES[state.dtype];$('#kwIn').value=SAMPLE_KW[state.dtype];$('#targetWords').value='';
+    runAnalyze();setMsg('sample_note',true);return;
+  }
+  if(b.id==='btnClear'){$('#docText').value='';$('#kwIn').value='';$('#targetWords').value='';state.doc=null;renderDoc();setMsg(null);return;}
+  if(b.id==='btnCopy'){
+    copyText(docSummary()).then(ok=>{
+      if(ok){const o=b.textContent;b.textContent=t('copied',null,true);setTimeout(()=>{b.textContent=t('btn_copy',null,true);},1600);}
+      else{setMsg('copyfail');}
+    });return;
+  }
+  if(b.id==='finSample'){
+    ['cur','prev'].forEach(p=>{state.fin[p]={};for(const id in SAMPLE_FIN[p])state.fin[p][id]=SAMPLE_FIN[p][id]/state.rates.PKR;});
+    refreshInputs();renderFin();return;
+  }
+  if(b.id==='finClear'){state.fin={cur:{},prev:{}};refreshInputs();renderFin();return;}
+});
+$('#curSel').addEventListener('change',e=>{state.cur=e.target.value;savePrefs();refreshInputs();updateCurNote();renderFin();});
+$('#panel-fin').addEventListener('input',e=>{
+  const el=e.target;if(!el.classList.contains('amt'))return;
+  const v=parseNum(el.value);
+  state.fin[el.dataset.p][el.dataset.id]=v==null?null:v/rate();
+  renderFin();
+});
+$('#panel-fin').addEventListener('focusin',e=>{
+  const el=e.target;if(!el.classList.contains('amt'))return;
+  const c=state.fin[el.dataset.p][el.dataset.id];
+  if(c!=null)el.value=String(Math.round(c*rate()*100)/100);
+});
+$('#panel-fin').addEventListener('focusout',e=>{
+  const el=e.target;if(el.classList.contains('amt')){
+    const c=state.fin[el.dataset.p][el.dataset.id];el.value=c==null?'':fmtInp(c*rate());
+  }
+});
+$('#panel-fin').addEventListener('change',e=>{
+  const el=e.target;if(!el.dataset||!el.dataset.rate)return;
+  const v=parseNum(el.value);
+  if(v>0)setRate(el.dataset.rate,v);else el.value=state.rates[el.dataset.rate];
+});
+$('#finFileIn').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  setFinMsg('',true);
+  await handleFinFile(f);
+  e.target.value='';
+});
+$('#fileIn').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const ext=f.name.split('.').pop().toLowerCase();
+  try{
+    if(ext==='docx'){
+      if(!window.mammoth)throw new Error('nodocx');
+      const buf=await f.arrayBuffer();
+      const r=await window.mammoth.extractRawText({arrayBuffer:buf});
+      $('#docText').value=r.value;
+    }else{$('#docText').value=await f.text();}
+    setMsg(null);
+  }catch(err){setMsg(err.message==='nodocx'?'err_docx':'err_file');}
+  e.target.value='';
+});
+
+/* init */
+loadPrefs();
+buildTable($('#tblIS'),IS_ROWS,'is');
+buildTable($('#tblBS'),BS_ROWS,'bs');
+buildRates();
+syncType();
+setTab('docs');
+applyLang();
+})();
+</script>
+</body>
+</html>

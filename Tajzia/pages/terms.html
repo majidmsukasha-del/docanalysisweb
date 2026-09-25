@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Terms and Conditions — Tajzia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eef2f8;--sheet:#ffffff;--ink:#101c33;--muted:#54627a;--line:#cdd7e6;--grid:#dde5f0;
+  --cobalt:#2740d8;--cobalt-ink:#ffffff;--hl:#ffe14d;--hl-ink:#101c33;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0a1120;--sheet:#111b2e;--ink:#e6ecf8;--muted:#95a5c2;--line:#26344f;--grid:#131e33;
+    --cobalt:#8ea4ff;--cobalt-ink:#0a1120;--hl:#ffe14d;--hl-ink:#101c33;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background-color:var(--paper);color:var(--ink);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;font:400 16px/1.65 var(--f-body)}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+a{color:var(--cobalt)}
+.wrap{max-width:800px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--sheet);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;max-width:800px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:21px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+.brand svg{width:28px;height:28px;flex:none;color:var(--ink)}
+.nav{display:flex;gap:18px;align-items:center;font-size:14px;font-weight:600}
+.nav a{text-decoration:none;color:var(--ink)}
+.nav a.cur{color:var(--cobalt)}
+.nav a.btn{border:1.5px solid var(--ink);border-radius:999px;padding:5px 16px;color:var(--ink)}
+
+.hero{padding:40px 0 8px}
+.eyebrow{display:inline-block;background:var(--hl);color:var(--hl-ink);font:700 12.5px/1.6 var(--f-body);letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 12px;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.15;letter-spacing:-.025em;margin:0 0 10px;max-width:22ch}
+.lead{max-width:60ch;color:var(--muted);font-size:16.5px;line-height:1.6;margin:0 0 28px}
+.lead b{color:var(--ink)}
+
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:clamp(18px,3vw,30px);margin-bottom:16px}
+.sheet h2{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:-.01em;margin:0 0 12px;line-height:1.3;display:flex;gap:10px;align-items:baseline}
+.sheet h2 .no{color:var(--cobalt);font-variant-numeric:tabular-nums}
+p{margin:0 0 12px;max-width:68ch}
+p:last-child{margin-bottom:0}
+ul{margin:0 0 12px;padding-inline-start:22px}
+li{margin:6px 0;max-width:64ch}
+ul:last-child{margin-bottom:0}
+.note{background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:12px 16px;font-size:14.5px;color:var(--muted);margin-bottom:22px}
+.contact{display:flex;flex-wrap:wrap;gap:10px 28px;font-size:15px}
+.contact div span{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}
+.foot{color:var(--muted);font-size:14px;padding:14px 0 40px;max-width:70ch}
+@media (max-width:600px){.nav{gap:12px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="tajzia.html">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="17" width="4" height="8" fill="currentColor"/><rect x="14" y="11" width="4" height="14" fill="currentColor"/><rect x="21" y="6" width="4" height="19" fill="#2740d8"/></svg>
+      Tajzia
+    </a>
+    <nav class="nav">
+      <a href="tajzia.html">Analyze</a>
+      <a href="about.html">About</a>
+      <a href="terms.html" class="cur">Terms</a>
+      <a href="tajzia.html" class="btn">Open the tool</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Legal</span>
+    <h1>Terms and Conditions</h1>
+    <p class="lead">Last updated: 24 September 2026. Please read these terms before using Tajzia. By using the site, you agree to them.</p>
+  </section>
+
+  <div class="note">This is a plain-language summary written to be clear, not a substitute for legal advice. If you plan to rely on it for a business or contract, have it reviewed by a qualified lawyer in your jurisdiction.</div>
+
+  <section class="sheet">
+    <h2><span class="no">1.</span> Agreement to these terms</h2>
+    <p>Tajzia is provided by MSUKASHA SMC-Private Limited ("MSUKASHA", "we", "us"), a company based in Islamabad, Pakistan. By accessing or using Tajzia (the "Service"), you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree, please do not use the Service.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">2.</span> Description of the Service</h2>
+    <p>Tajzia is a free tool that performs rule-based analysis of documents (CVs, assignments, research reports and theses) and financial statements (income statements and balance sheets) that you enter or upload. All analysis runs locally in your browser using fixed rules and standard formulas — no artificial intelligence, human reviewer, or external server is involved in generating results.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">3.</span> No professional advice</h2>
+    <p>Tajzia's output is for general informational purposes only and does not constitute:</p>
+    <ul>
+      <li>Academic advice or an assessment of the quality of your ideas, arguments, or research — it checks structure and language patterns, not substance;</li>
+      <li>A plagiarism or academic-integrity check of any kind;</li>
+      <li>Financial, investment, accounting, tax, or legal advice. Ratio benchmarks are general rules of thumb and are not a substitute for a qualified accountant, auditor, or financial advisor;</li>
+      <li>A guarantee of grades, admissions, employment, funding, or any other outcome.</li>
+    </ul>
+    <p>You should independently verify any result before relying on it, and consult an appropriately qualified professional for decisions that matter to you.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">4.</span> Your content and privacy</h2>
+    <p>Tajzia runs client-side: text, documents, and financial figures you enter or upload are processed in your own browser and are not transmitted to, or stored on, MSUKASHA's servers. Refreshing or closing the page clears this data. You retain all rights to any content you enter, and you are solely responsible for having the right to use and analyze that content (for example, that you are authorized to process someone else's document or financial data).</p>
+    <p>No account, registration, or payment is required to use the Service, and Tajzia does not knowingly collect personal information through the analysis features.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">5.</span> Acceptable use</h2>
+    <p>You agree not to use Tajzia to:</p>
+    <ul>
+      <li>Violate any applicable law or regulation;</li>
+      <li>Attempt to disrupt, reverse-engineer, or gain unauthorized access to the Service or its underlying code beyond what your browser's normal use permits;</li>
+      <li>Misrepresent Tajzia's output as a certified, professional, or legally binding assessment (for example, presenting a score as an official audit, an academic grade, or a plagiarism clearance).</li>
+    </ul>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">6.</span> Intellectual property</h2>
+    <p>The Tajzia name, design, and underlying code are the property of MSUKASHA SMC-Private Limited, except where third-party open-source components are used under their own licenses. You may use the Service for personal, academic, or business analysis. You may not copy, resell, or redistribute the Service itself as your own product without permission.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">7.</span> Disclaimer of warranties</h2>
+    <p>The Service is provided "as is" and "as available," without warranties of any kind, express or implied, including but not limited to accuracy, completeness, fitness for a particular purpose, or non-infringement. Exchange rates shown are approximate defaults that you can edit; they are not live market rates. Rule-based checks can produce false positives, false negatives, or results that do not reflect the true quality of your work or financial position.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">8.</span> Limitation of liability</h2>
+    <p>To the fullest extent permitted by law, MSUKASHA SMC-Private Limited shall not be liable for any indirect, incidental, special, or consequential damages, or any loss of data, opportunity, grades, income, or profit, arising from your use of, or inability to use, the Service, even if advised of the possibility of such damages. The Service is offered free of charge, and your use of it is at your own risk.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">9.</span> Changes to the Service and these Terms</h2>
+    <p>We may update, modify, or discontinue any part of the Service at any time, and may revise these Terms from time to time. Continued use of the Service after changes are posted constitutes acceptance of the updated Terms. We recommend checking this page periodically.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">10.</span> Governing law</h2>
+    <p>These Terms are governed by the laws of the Islamic Republic of Pakistan, without regard to conflict-of-law principles. Any disputes arising from these Terms or the Service shall be subject to the exclusive jurisdiction of the courts of Islamabad, Pakistan.</p>
+  </section>
+
+  <section class="sheet">
+    <h2><span class="no">11.</span> Contact</h2>
+    <p>Questions about these Terms can be sent to:</p>
+    <div class="contact">
+      <div><span>Company</span>MSUKASHA SMC-Private Limited</div>
+      <div><span>Email</span>info@msukasha.com</div>
+      <div><span>WhatsApp</span>+92 331 3730953</div>
+    </div>
+  </section>
+</main>
+<footer class="wrap foot">By using Tajzia, you acknowledge that you have read and understood these Terms and Conditions.</footer>
+</body>
+</html>
